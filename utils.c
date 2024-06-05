@@ -25,13 +25,13 @@
  * For more information, please refer to <http://unlicense.org/>
  */
 
+#include <string.h>
 #include "utils.h"
 
 #if defined(IEW_ENABLE_DEBUG)
 
 #include <stdio.h>
 #include <time.h>
-#include <string.h>
 #include <stdarg.h>
 #include <limits.h>
 

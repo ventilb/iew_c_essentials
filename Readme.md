@@ -13,6 +13,19 @@ UTF-8 String utilities. Uses [sheredom/utf8.h][1] under the hood.
 Some code from [sheredom/utf8.h][1] was copied and adapted to our
 needs.
 
+The intention of the string utilities is to work as natively with
+UTF-8 as possible. For example indices passed to `str_substring` 
+expect codepoint indices and not byte indices.
+
+## hash.h
+Adds FNV32a and FNV64a utilities. Uses [catb0t/fnv-hash][3] library. That 
+library is compiled and statically linked into *IEW C Essentials*.
+
+The functions are designed to work on Little-Endian machines.
+
+According to [Wikipedia: Fowler–Noll–Vo hash function][4] and [FNV Hash][5]
+the FNV algorithm was put under [CC0 - Public Domain][6]. 
+
 ## License
 
 This is free and unencumbered software released into the public domain.
@@ -43,3 +56,7 @@ For more information, please refer to <http://unlicense.org/>
 
 [1]: https://github.com/sheredom/utf8.h
 [2]: https://www.jetbrains.com/clion/
+[3]: https://github.com/catb0t/fnv-hash
+[4]: https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function#Overview
+[5]: http://www.isthe.com/chongo/tech/comp/fnv/index.html#public_domain
+[6]: http://www.isthe.com/chongo/tech/comp/fnv/index.html#public_domain

@@ -32,14 +32,36 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/sheredom/utf8.h.git
         GIT_TAG master
 )
-FetchContent_MakeAvailable(utf8_h)
+
+FetchContent_Declare(
+        fnv_hash
+        # Specify the commit you depend on and update it regularly.
+        GIT_REPOSITORY https://github.com/catb0t/fnv-hash.git
+        GIT_TAG master
+)
+FetchContent_MakeAvailable(utf8_h fnv_hash)
+
+add_custom_target(fnv_hash ALL COMMAND make check
+        WORKING_DIRECTORY ${fnv_hash_SOURCE_DIR}
+)
 
 add_library(iew_c_essentials STATIC
         utils.c
         vec_uint64_t.c
         vec_char.c
         string.c
+        hash.h
 )
 
-target_link_libraries(iew_c_essentials PRIVATE ${utf8_h_SOURCE_DIR}/utf8.h)
-target_include_directories(iew_c_essentials PUBLIC ${utf8_h_SOURCE_DIR})
+target_link_libraries(iew_c_essentials
+        PRIVATE ${utf8_h_SOURCE_DIR}/utf8.h
+        PRIVATE ${fnv_hash_SOURCE_DIR}/hash_32.o
+        PRIVATE ${fnv_hash_SOURCE_DIR}/hash_32a.o
+        PRIVATE ${fnv_hash_SOURCE_DIR}/hash_64.o
+        PRIVATE ${fnv_hash_SOURCE_DIR}/hash_64a.o
+)
+
+target_include_directories(iew_c_essentials
+        PUBLIC ${utf8_h_SOURCE_DIR}
+        PUBLIC ${fnv_hash_SOURCE_DIR}
+)

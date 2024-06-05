@@ -27,6 +27,22 @@
 #ifndef COL_ERROR_H
 #define COL_ERROR_H
 
+#if defined(IEW_ENABLE_DEBUG)
+#include <stdio.h>
+
+#define COL_ASSERT(x, m)                                             \
+	do                                                           \
+	{                                                            \
+		if (!(x))                                            \
+		{                                                        \
+			fprintf(stderr, "Assertion '%s' failed at %s:%d.\n", m, __FILE__, __LINE__); \
+			abort();                                        \
+		}                                                        \
+	} while (0);
+#else
+#define COL_ASSERT(x, m)
+#endif
+
 // https://mccue.dev/pages/7-27-22-c-errors
 
 typedef enum iew_c_essentials_err {

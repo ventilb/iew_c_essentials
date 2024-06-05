@@ -15,6 +15,7 @@ add_executable(iew_c_essentials_tests
         vec_uint64_t_test.cc
         vec_char_test.cc
         string_test.cc
+        hash_test.cpp
 )
 target_link_libraries(iew_c_essentials_tests gtest_main iew_c_essentials)
 add_test(NAME iew_c_essentials_tests COMMAND iew_c_essentials_tests)
