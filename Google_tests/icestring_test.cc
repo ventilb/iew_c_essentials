@@ -26,7 +26,7 @@
  */
 
 #include "gtest/gtest.h"
-#include "../string.h"
+#include "../icestring.h"
 
 TEST(string_builder, StrOfEmpty) {
     char * str = str_of_empty();

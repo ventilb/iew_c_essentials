@@ -21,8 +21,6 @@ IF(ENABLE_DEBUG)
     add_compile_definitions(IEW_ENABLE_DEBUG=${ENABLE_DEBUG})
 ENDIF (ENABLE_DEBUG)
 
-add_subdirectory(Google_tests)
-
 # utf8.h
 # Making it available in a submodule makes a lot of troubles so put it here
 include(FetchContent)
@@ -41,27 +39,31 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(utf8_h fnv_hash)
 
-add_custom_target(fnv_hash ALL COMMAND make check
+add_custom_target(fnv_hash COMMAND make check
         WORKING_DIRECTORY ${fnv_hash_SOURCE_DIR}
 )
 
-add_library(iew_c_essentials STATIC
+SET(fnv_hash.o ${fnv_hash_SOURCE_DIR}/hash_32.o ${fnv_hash_SOURCE_DIR}/hash_32a.o ${fnv_hash_SOURCE_DIR}/hash_64.o ${fnv_hash_SOURCE_DIR}/hash_64a.o)
+
+add_library(libiewcessentials-static STATIC
         utils.c
         vec_uint64_t.c
         vec_char.c
-        string.c
+        icestring.c
         hash.h
 )
 
-target_link_libraries(iew_c_essentials
-        PRIVATE ${utf8_h_SOURCE_DIR}/utf8.h
-        PRIVATE ${fnv_hash_SOURCE_DIR}/hash_32.o
-        PRIVATE ${fnv_hash_SOURCE_DIR}/hash_32a.o
-        PRIVATE ${fnv_hash_SOURCE_DIR}/hash_64.o
-        PRIVATE ${fnv_hash_SOURCE_DIR}/hash_64a.o
+add_dependencies(libiewcessentials-static fnv_hash)
+
+target_link_libraries(libiewcessentials-static
+        PUBLIC ${utf8_h_SOURCE_DIR}/utf8.h
+        PUBLIC ${fnv_hash.o}
 )
 
-target_include_directories(iew_c_essentials
+target_include_directories(libiewcessentials-static
         PUBLIC ${utf8_h_SOURCE_DIR}
         PUBLIC ${fnv_hash_SOURCE_DIR}
 )
+
+add_subdirectory(Google_tests)
+

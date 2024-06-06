@@ -1,4 +1,4 @@
-project(Google_tests)
+project(iew_c_essentials_tests)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -8,14 +8,18 @@ FetchContent_Declare(
 )
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+FetchContent_GetProperties(googletest)
+if(NOT googletest_POPULATED)
+    FetchContent_Populate(googletest)
+    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
+endif()
 
 # Now simply link against gtest or gtest_main as needed. Eg
-add_executable(iew_c_essentials_tests
+add_executable(run_iew_c_essentials_tests
         vec_uint64_t_test.cc
         vec_char_test.cc
-        string_test.cc
+        icestring_test.cc
         hash_test.cpp
 )
-target_link_libraries(iew_c_essentials_tests gtest_main iew_c_essentials)
-add_test(NAME iew_c_essentials_tests COMMAND iew_c_essentials_tests)
+target_link_libraries(run_iew_c_essentials_tests gtest_main libiewcessentials-static)
+add_test(NAME run_iew_c_essentials_tests COMMAND run_iew_c_essentials_tests)

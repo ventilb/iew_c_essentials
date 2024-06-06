@@ -25,7 +25,7 @@
  * For more information, please refer to <http://unlicense.org/>
  */
 
-#include "string.h"
+#include "icestring.h"
 #include "utils.h"
 
 #include <stdlib.h>
