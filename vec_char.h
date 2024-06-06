@@ -36,8 +36,6 @@ extern "C" {
 makePrimitiveVecOfTypeApi(char)
 makeVecApi(char)
 
-char* vec_char_string(vec_char v);
-
 #ifdef __cplusplus
 };
 #endif
