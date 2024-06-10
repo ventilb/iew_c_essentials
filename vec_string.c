@@ -25,7 +25,7 @@
  * For more information, please refer to <http://unlicense.org/>
  */
 
-#include "vec_char.h"
+#include "vec_string.h"
 
-makePrimitiveVecOfTypeImpl(char, char)
-makeVecImpl(char, char)
+makePrimitiveVecOfTypeImpl(string, const char*)
+makeVecImpl(string, const char*)

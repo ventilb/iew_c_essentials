@@ -24,20 +24,23 @@
  *
  * For more information, please refer to <http://unlicense.org/>
  */
-#ifndef VEC_CHAR_H
-#define VEC_CHAR_H
+#ifndef IEW_C_ESSENTIALS_VEC_CHAR_H
+#define IEW_C_ESSENTIALS_VEC_CHAR_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "macros.h"
+#include "icemacros.h"
 
-makePrimitiveVecOfTypeApi(char)
-makeVecApi(char)
+/**
+ * Defines vector vec_char which is a vector of chars/bytes.
+ */
+makePrimitiveVecOfTypeApi(char, char)
+makeVecApi(char, char)
 
 #ifdef __cplusplus
 };
 #endif
 
-#endif // VEC_CHAR_H
+#endif // IEW_C_ESSENTIALS_VEC_CHAR_H

@@ -25,7 +25,7 @@
  * For more information, please refer to <http://unlicense.org/>
  */
 
-#include "vec_uint64_t.h"
+#include "vec_uint64.h"
 
-makePrimitiveVecOfTypeImpl(uint64_t)
-makeVecImpl(uint64_t)
+makePrimitiveVecOfTypeImpl(uint64, uint64_t)
+makeVecImpl(uint64, uint64_t)

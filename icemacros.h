@@ -24,8 +24,8 @@
  *
  * For more information, please refer to <http://unlicense.org/>
  */
-#ifndef MACROS_H
-#define MACROS_H
+#ifndef IEW_C_ESSENTIALS_ICEMACROS_H
+#define IEW_C_ESSENTIALS_ICEMACROS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,42 +38,43 @@ extern "C" {
 
 #include "col_error.h"
 #include "utils.h"
+#include "icelogging.h"
 
-#define makeVecApi(type) \
-    size_t vec_##type##_len(vec_##type v); \
-    col_error_t vec_##type##_pop_back(vec_##type v, type* res); \
-    void vec_##type##_clear(vec_##type v); \
-    int vec_##type##_empty(vec_##type v);  \
-    type* vec_##type##_data(vec_##type v);
+#define makeVecApi(name, type) \
+    size_t vec_##name##_len(vec_##name v); \
+    col_error_t vec_##name##_pop_back(vec_##name v, type* res); \
+    void vec_##name##_clear(vec_##name v); \
+    int vec_##name##_empty(vec_##name v);  \
+    type* vec_##name##_data(vec_##name v);
 
-#define makePrimitiveVecOfTypeApi(type) \
-    typedef type* iter_##type;         \
-    struct vec__##type {                \
+#define makePrimitiveVecOfTypeApi(name, type) \
+    typedef type* iter_##name;         \
+    struct vec__##name {                \
         size_t len;                     \
         size_t cap;                     \
-        type *data;                     \
-        type *begin;                    \
-        type *end;                      \
+        type* data;                     \
+        type* begin;                    \
+        type* end;                      \
     };                                  \
-    typedef struct vec__##type* vec_##type; \
-    vec_##type vec_##type##_new();      \
-    col_error_t vec_##type##_free(vec_##type v); \
-    col_error_t vec_##type##_reserve(vec_##type v, size_t new_cap); \
-    col_error_t vec_##type##_push_back(vec_##type v, type val); \
-    col_error_t vec_##type##_insert(vec_##type v, size_t i, type val); \
-    col_error_t vec_##type##_back(vec_##type v, type* res);     \
-    col_error_t vec_##type##_get(vec_##type v, size_t i, type* res); \
-    col_error_t vec_##type##_set(vec_##type v, size_t i, type val);  \
-    col_error_t vec_##type##_erase(vec_##type v, size_t i);                                   \
-    iter_##type vec_##type##_begin(vec_##type v);   \
-    iter_##type vec_##type##_end(vec_##type v);
+    typedef struct vec__##name* vec_##name; \
+    vec_##name vec_##name##_new();      \
+    col_error_t vec_##name##_free(vec_##name v); \
+    col_error_t vec_##name##_reserve(vec_##name v, size_t new_cap); \
+    col_error_t vec_##name##_push_back(vec_##name v, type val); \
+    col_error_t vec_##name##_insert(vec_##name v, size_t i, type val); \
+    col_error_t vec_##name##_back(vec_##name v, type* res);     \
+    col_error_t vec_##name##_get(vec_##name v, size_t i, type* res); \
+    col_error_t vec_##name##_set(vec_##name v, size_t i, type val);  \
+    col_error_t vec_##name##_erase(vec_##name v, size_t i);                                   \
+    iter_##name vec_##name##_begin(vec_##name v);   \
+    iter_##name vec_##name##_end(vec_##name v);
 
 
-#define makeVecImpl(type) \
-    size_t vec_##type##_len(vec_##type v) { \
+#define makeVecImpl(name, type) \
+    size_t vec_##name##_len(vec_##name v) { \
         return v->len;    \
     }                     \
-    col_error_t vec_##type##_pop_back(vec_##type v, type* res) { \
+    col_error_t vec_##name##_pop_back(vec_##name v, type* res) { \
         if (v->len <= 0) {\
             return COL_ERR_UNDERFLOW;       \
         }                 \
@@ -84,21 +85,21 @@ extern "C" {
         v->end = NULL;    \
         return COL_OK;    \
     }                     \
-    void vec_##type##_clear(vec_##type v) { \
+    void vec_##name##_clear(vec_##name v) { \
         v->len = 0;       \
         v->end = NULL;    \
     }                     \
-    int vec_##type##_empty(vec_##type v) { \
+    int vec_##name##_empty(vec_##name v) { \
         return v->len == 0;                 \
     }                     \
-    type* vec_##type##_data(vec_##type v) { \
+    type* vec_##name##_data(vec_##name v) { \
         return v->data;   \
     }
 
-#define makePrimitiveVecOfTypeImpl(type) \
-vec_##type vec_##type##_new() {          \
-    ltrace("[vec_new] - sizeof=%d", sizeof(struct vec__##type)); \
-    vec_##type v = IEW_FN_ALIGNED_ALLOC(sizeof(void *), sizeof(struct vec__##type));    \
+#define makePrimitiveVecOfTypeImpl(name, type) \
+vec_##name vec_##name##_new() {          \
+    ltrace("[vec_new] - sizeof=%d", sizeof(struct vec__##name)); \
+    vec_##name v = IEW_FN_ALIGNED_ALLOC(sizeof(void *), sizeof(struct vec__##name));    \
     if (v) {                             \
         v->len = 0;                      \
         v->cap = 0;                      \
@@ -109,7 +110,7 @@ vec_##type vec_##type##_new() {          \
     return v;                            \
 } \
                                          \
-col_error_t vec_##type##_free(vec_##type v) {                    \
+col_error_t vec_##name##_free(vec_##name v) {                    \
         if (v) {                         \
             if (v->data) {IEW_FN_FREE(v->data);}                 \
             v->len = 0;                  \
@@ -122,10 +123,10 @@ col_error_t vec_##type##_free(vec_##type v) {                    \
         return COL_OK;                   \
     }                                    \
                                          \
-col_error_t vec_##type##_reserve(vec_##type v, size_t new_cap) { \
+col_error_t vec_##name##_reserve(vec_##name v, size_t new_cap) { \
     ltrace("[vec_reserve] - requested new cap=%d", new_cap);     \
     if (new_cap <= v->cap) {             \
-        ltrace("[vec_reserve] - vector has space, no resize");   \
+        ltrace0("[vec_reserve] - vector has space, no resize");   \
         return COL_OK;                   \
     }                                    \
                                          \
@@ -151,10 +152,10 @@ col_error_t vec_##type##_reserve(vec_##type v, size_t new_cap) { \
     return COL_OK;                       \
 }                                        \
                                          \
-col_error_t vec_##type##_push_back(vec_##type v, type val) {     \
+col_error_t vec_##name##_push_back(vec_##name v, type val) {     \
     ltrace("[vec_push_back] - begin=%p, begin1=%p", v->begin, v->begin);                  \
     col_error_t err = COL_OK;            \
-    if ((err = vec_##type##_reserve(v, v->len + 1)) != COL_OK) { \
+    if ((err = vec_##name##_reserve(v, v->len + 1)) != COL_OK) { \
         return err;                      \
     }                                    \
                                          \
@@ -165,9 +166,9 @@ col_error_t vec_##type##_push_back(vec_##type v, type val) {     \
     return COL_OK;                       \
 }                                        \
                                          \
-col_error_t vec_##type##_insert(vec_##type v, size_t i, type val) {                       \
+col_error_t vec_##name##_insert(vec_##name v, size_t i, type val) {                       \
     col_error_t err = COL_OK;            \
-    if ((err = vec_##type##_reserve(v, v->len + 1)) != COL_OK) { \
+    if ((err = vec_##name##_reserve(v, v->len + 1)) != COL_OK) { \
         return err;                      \
     }                                    \
     if (i < v->len) {                    \
@@ -183,7 +184,7 @@ col_error_t vec_##type##_insert(vec_##type v, size_t i, type val) {             
     return COL_OK;                       \
 }                                        \
                                          \
-col_error_t vec_##type##_back(vec_##type v, type* res) {         \
+col_error_t vec_##name##_back(vec_##name v, type* res) {         \
     if (v->len <= 0) {                   \
         return COL_ERR_UNDERFLOW;        \
     }                                    \
@@ -191,7 +192,7 @@ col_error_t vec_##type##_back(vec_##type v, type* res) {         \
     return COL_OK;                       \
 }                                        \
                                          \
-col_error_t vec_##type##_get(vec_##type v, size_t i, type* res) {\
+col_error_t vec_##name##_get(vec_##name v, size_t i, type* res) {\
     if (i >= v->len) {                   \
         return COL_ERR_ILLEGAL_ARGUMENT; \
     }                                    \
@@ -199,7 +200,7 @@ col_error_t vec_##type##_get(vec_##type v, size_t i, type* res) {\
     return COL_OK;                       \
 }                                        \
                                          \
-col_error_t vec_##type##_set(vec_##type v, size_t i, type val) { \
+col_error_t vec_##name##_set(vec_##name v, size_t i, type val) { \
     if (i >= v->len) {                   \
         return COL_ERR_ILLEGAL_ARGUMENT; \
     }                                    \
@@ -207,7 +208,7 @@ col_error_t vec_##type##_set(vec_##type v, size_t i, type val) { \
     return COL_OK;                       \
 }                                        \
                                          \
-col_error_t vec_##type##_erase(vec_##type v, size_t i) {   \
+col_error_t vec_##name##_erase(vec_##name v, size_t i) {   \
     if (i >= v->len) {                   \
         return COL_ERR_ILLEGAL_ARGUMENT; \
     }                                    \
@@ -220,12 +221,12 @@ col_error_t vec_##type##_erase(vec_##type v, size_t i) {   \
     return COL_OK;                       \
 }                                        \
                                          \
-iter_##type vec_##type##_begin(vec_##type v) {                   \
+iter_##name vec_##name##_begin(vec_##name v) {                   \
         if (!v->begin) v->begin = v->data;                       \
         return v->begin;                 \
     }                                    \
                                          \
-iter_##type vec_##type##_end(vec_##type v) {                     \
+iter_##name vec_##name##_end(vec_##name v) {                     \
         if (!v->end) v->end = v->data + v->len;                  \
         return v->end;                   \
     }
@@ -235,4 +236,4 @@ iter_##type vec_##type##_end(vec_##type v) {                     \
 };
 #endif
 
-#endif // MACROS_H
+#endif // IEW_C_ESSENTIALS_ICEMACROS_H

@@ -24,8 +24,23 @@
  *
  * For more information, please refer to <http://unlicense.org/>
  */
+#ifndef IEW_C_ESSENTIALS_VEC_CHAR_H
+#define IEW_C_ESSENTIALS_VEC_CHAR_H
 
-#include "vec_char.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-makePrimitiveVecOfTypeImpl(char, char)
-makeVecImpl(char, char)
+#include "icemacros.h"
+
+/**
+ * Defines a vector of strings (char *).
+ */
+makePrimitiveVecOfTypeApi(string, const char*)
+makeVecApi(string, const char*)
+
+#ifdef __cplusplus
+};
+#endif
+
+#endif // IEW_C_ESSENTIALS_VEC_CHAR_H

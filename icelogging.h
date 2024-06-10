@@ -24,28 +24,66 @@
  *
  * For more information, please refer to <http://unlicense.org/>
  */
-#ifndef UTILS_H
-#define UTILS_H
+
+#ifndef IEW_C_ESSENTIALS_ICELOGGING_H
+#define IEW_C_ESSENTIALS_ICELOGGING_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <stdint.h>
-#include <stdlib.h>
 
-// https://stackoverflow.com/questions/5891221/variadic-macros-with-zero-arguments
-#define VEC_VA_ARGS(...) , ##__VA_ARGS__
-
-#define VEC_TRUE (1)
-#define VEC_FALSE (0)
-
-extern const double VEC_GROWTH;
-
-void* col_align_alloc(void * ptr, size_t size, const size_t alignment);
-
-#ifdef __cplusplus
-};
+#if defined(IEW_LOG_LEVEL_ERROR)
+void log_error(const char* message, ...);
+#define lerror0(m) lerror(m, "")
+#define lerror(m, ...) { log_error(m, __VA_ARGS__); } while(0)
+#else
+#define lerror0(m)
+#define lerror(m, ...)
 #endif
 
-#endif // UTILS_H
+#if defined(IEW_LOG_LEVEL_INFO)
+void log_info(const char* message, ...);
+#define linfo0(m) linfo(m, "")
+#define linfo(m, ...) log_info(m, __VA_ARGS__)
+#else
+#define linfo0(m)
+#define linfo(m, ...)
+#endif
+
+#if defined(IEW_LOG_LEVEL_DEBUG)
+void log_debug(const char* message, ...);
+#define ldebug0(m) ldebug(m, "")
+#define ldebug(m, ...) log_debug(m, __VA_ARGS__)
+#else
+#define ldebug0(m)
+#define ldebug(m, ...)
+#endif
+
+#if defined(IEW_LOG_LEVEL_TRACE)
+void log_trace(const char* message, ...);
+void log_method_trace(const char* message, const char *const file, const int line);
+#define ltrace0(_m) ltrace(_m, "")
+#define ltrace(_m, ...) log_trace(_m, __VA_ARGS__)
+#define ctrace(_m) log_method_trace(_m, __FILE__, __LINE__)
+#else
+#define ltrace0(_m)
+#define ltrace(_m, ...)
+#define ctrace(_m)
+#endif
+
+#if defined(IEW_MEM_TRACE)
+void log_mem_trace(const char* message, ...);
+#define mem_trace0(m) mem_trace(m, "")
+#define mem_trace(m, ...) log_mem_trace(m, __VA_ARGS__)
+#else
+#define mem_trace0(m)
+#define mem_trace(m, ...)
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // IEW_C_ESSENTIALS_ICELOGGING_H

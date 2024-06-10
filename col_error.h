@@ -30,7 +30,7 @@
 #if defined(IEW_ENABLE_DEBUG)
 #include <stdio.h>
 
-#define COL_ASSERT(x, m)                                             \
+#define IVK_ASSERT(x, m)                                             \
 	do                                                           \
 	{                                                            \
 		if (!(x))                                            \
@@ -40,7 +40,7 @@
 		}                                                        \
 	} while (0);
 #else
-#define COL_ASSERT(x, m)
+#define IVK_ASSERT(x, m)
 #endif
 
 // https://mccue.dev/pages/7-27-22-c-errors

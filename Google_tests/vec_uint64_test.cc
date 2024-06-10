@@ -27,115 +27,115 @@
 
 #include <cmath>
 #include "gtest/gtest.h"
-#include "../vec_uint64_t.h"
+#include "../vec_uint64.h"
 
-TEST(vec_uint64_t, VecAllocation) {
-    vec_uint64_t vec = vec_uint64_t_new();
+TEST(vec_uint64, VecAllocation) {
+    vec_uint64 vec = vec_uint64_new();
 
     EXPECT_NE(nullptr, vec);
 
     // vector is empty
-    EXPECT_EQ(0, vec_uint64_t_len(vec));
-    EXPECT_TRUE(vec_uint64_t_empty(vec));
+    EXPECT_EQ(0, vec_uint64_len(vec));
+    EXPECT_TRUE(vec_uint64_empty(vec));
 
     // Implementation detail...newly allocated vectors don't have
     // data member allocated
-    EXPECT_EQ(nullptr, vec_uint64_t_data(vec));
+    EXPECT_EQ(nullptr, vec_uint64_data(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_free(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
 }
 
-TEST(vec_uint64_t, VecPushBack) {
+TEST(vec_uint64, VecPushBack) {
     uint64_t value = 42;
 
-    vec_uint64_t vec = vec_uint64_t_new();
+    vec_uint64 vec = vec_uint64_new();
 
     // vector is empty...test that underflow error is triggered and the
     // out value did not change
-    EXPECT_EQ(COL_ERR_UNDERFLOW, vec_uint64_t_back(vec, &value));
+    EXPECT_EQ(COL_ERR_UNDERFLOW, vec_uint64_back(vec, &value));
     EXPECT_EQ(42, value);
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_push_back(vec, 1));
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 1));
 
     // vector has 1 element
-    EXPECT_EQ(1, vec_uint64_t_len(vec));
-    EXPECT_FALSE(vec_uint64_t_empty(vec));
+    EXPECT_EQ(1, vec_uint64_len(vec));
+    EXPECT_FALSE(vec_uint64_empty(vec));
 
     // get the last element
-    EXPECT_EQ(COL_OK, vec_uint64_t_back(vec, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_back(vec, &value));
     EXPECT_EQ(1, value);
-    EXPECT_FALSE(vec_uint64_t_empty(vec));
+    EXPECT_FALSE(vec_uint64_empty(vec));
 
     // vector length hasn't changed
-    EXPECT_EQ(1, vec_uint64_t_len(vec));
-    EXPECT_FALSE(vec_uint64_t_empty(vec));
+    EXPECT_EQ(1, vec_uint64_len(vec));
+    EXPECT_FALSE(vec_uint64_empty(vec));
 
     value = 0;
-    EXPECT_EQ(COL_OK, vec_uint64_t_pop_back(vec, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_pop_back(vec, &value));
     EXPECT_EQ(1, value);
-    EXPECT_EQ(COL_ERR_UNDERFLOW, vec_uint64_t_pop_back(vec, nullptr));
+    EXPECT_EQ(COL_ERR_UNDERFLOW, vec_uint64_pop_back(vec, nullptr));
 
     // vector is empty
-    EXPECT_EQ(0, vec_uint64_t_len(vec));
-    EXPECT_TRUE(vec_uint64_t_empty(vec));
+    EXPECT_EQ(0, vec_uint64_len(vec));
+    EXPECT_TRUE(vec_uint64_empty(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_free(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
 }
 
-TEST(vec_uint64_t, VecClear) {
-    vec_uint64_t vec = vec_uint64_t_new();
+TEST(vec_uint64, VecClear) {
+    vec_uint64 vec = vec_uint64_new();
 
-    EXPECT_EQ(0, vec_uint64_t_len(vec)); // vector is empty
+    EXPECT_EQ(0, vec_uint64_len(vec)); // vector is empty
 
-    vec_uint64_t_clear(vec);
+    vec_uint64_clear(vec);
 
-    EXPECT_EQ(0, vec_uint64_t_len(vec)); // vector is empty
+    EXPECT_EQ(0, vec_uint64_len(vec)); // vector is empty
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_free(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
 }
 
-TEST(vec_uint64_t, VecSetGet) {
+TEST(vec_uint64, VecSetGet) {
     uint64_t value = 42;
 
-    vec_uint64_t vec = vec_uint64_t_new();
+    vec_uint64 vec = vec_uint64_new();
 
-    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_t_get(vec, -1, &value));
-    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_t_get(vec, 0, &value));
-    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_t_get(vec, 1, &value));
-    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_t_get(vec, SIZE_MAX, &value));
+    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_get(vec, -1, &value));
+    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_get(vec, 0, &value));
+    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_get(vec, 1, &value));
+    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_get(vec, SIZE_MAX, &value));
     EXPECT_EQ(42, value); // Value didn't changed
 
-    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_t_set(vec, -1, 42));
-    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_t_set(vec, 0, 42));
-    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_t_set(vec, 1, 42));
-    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_t_set(vec, SIZE_MAX, 42));
+    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_set(vec, -1, 42));
+    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_set(vec, 0, 42));
+    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_set(vec, 1, 42));
+    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_set(vec, SIZE_MAX, 42));
 
     // Push value '1' onto vector
-    EXPECT_EQ(COL_OK, vec_uint64_t_push_back(vec, 1));
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 0, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 1));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 0, &value));
     EXPECT_EQ(1, value);
-    EXPECT_EQ(1, vec_uint64_t_len(vec));
+    EXPECT_EQ(1, vec_uint64_len(vec));
 
     // Set value at index '0' to '42'
-    EXPECT_EQ(COL_OK, vec_uint64_t_set(vec, 0, 42));
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 0, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_set(vec, 0, 42));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 0, &value));
     EXPECT_EQ(42, value);
-    EXPECT_EQ(1, vec_uint64_t_len(vec));
+    EXPECT_EQ(1, vec_uint64_len(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_free(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
 }
 
-TEST(vec_uint64_t, IteratorTest) {
+TEST(vec_uint64, IteratorTest) {
     uint64_t value = 0;
 
-    vec_uint64_t vec = vec_uint64_t_new();
-    EXPECT_EQ(COL_OK, vec_uint64_t_push_back(vec, 10));
-    EXPECT_EQ(COL_OK, vec_uint64_t_push_back(vec, 100));
-    EXPECT_EQ(COL_OK, vec_uint64_t_push_back(vec, 1000));
-    EXPECT_EQ(3, vec_uint64_t_len(vec));
+    vec_uint64 vec = vec_uint64_new();
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 10));
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 100));
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 1000));
+    EXPECT_EQ(3, vec_uint64_len(vec));
 
-    iter_uint64_t begin = vec_uint64_t_begin(vec);
-    iter_uint64_t end = vec_uint64_t_end(vec);
+    iter_uint64 begin = vec_uint64_begin(vec);
+    iter_uint64 end = vec_uint64_end(vec);
 
     EXPECT_EQ(3, end - begin);
     EXPECT_EQ(10, *begin);
@@ -148,101 +148,101 @@ TEST(vec_uint64_t, IteratorTest) {
     }
 
     int i = 0;
-    for (iter_uint64_t b = vec_uint64_t_begin(vec); b < vec_uint64_t_end(vec); b ++) {
+    for (iter_uint64 b = vec_uint64_begin(vec); b < vec_uint64_end(vec); b ++) {
         EXPECT_EQ(pow(10, (i + 1)), *b);
         i ++;
     }
 
-    for (size_t b = 0; b < vec_uint64_t_len(vec);) {
-        EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, b, &value));
+    for (size_t b = 0; b < vec_uint64_len(vec);) {
+        EXPECT_EQ(COL_OK, vec_uint64_get(vec, b, &value));
         if (value == 100) {
-            EXPECT_EQ(COL_OK, vec_uint64_t_erase(vec, b));
+            EXPECT_EQ(COL_OK, vec_uint64_erase(vec, b));
         } else {
             b++;
         }
     }
-    EXPECT_EQ(2, vec_uint64_t_len(vec));
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 0, &value));
+    EXPECT_EQ(2, vec_uint64_len(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 0, &value));
     EXPECT_EQ(10, value);
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 1, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 1, &value));
     EXPECT_EQ(1000, value);
-    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_t_get(vec, 2, &value));
+    EXPECT_EQ(COL_ERR_ILLEGAL_ARGUMENT, vec_uint64_get(vec, 2, &value));
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_erase(vec, 0));
-    EXPECT_EQ(1, vec_uint64_t_len(vec));
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 0, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_erase(vec, 0));
+    EXPECT_EQ(1, vec_uint64_len(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 0, &value));
     EXPECT_EQ(1000, value);
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_erase(vec, 0));
-    EXPECT_EQ(0, vec_uint64_t_len(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_erase(vec, 0));
+    EXPECT_EQ(0, vec_uint64_len(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_free(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
 }
 
-TEST(vec_uint64_t, InsertInMiddle) {
+TEST(vec_uint64, InsertInMiddle) {
     uint64_t value = 0;
 
-    vec_uint64_t vec = vec_uint64_t_new();
-    EXPECT_EQ(COL_OK, vec_uint64_t_push_back(vec, 10));
-    EXPECT_EQ(COL_OK, vec_uint64_t_push_back(vec, 1000));
-    EXPECT_EQ(2, vec_uint64_t_len(vec));
+    vec_uint64 vec = vec_uint64_new();
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 10));
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 1000));
+    EXPECT_EQ(2, vec_uint64_len(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_insert(vec, 1, 100));
-    EXPECT_EQ(3, vec_uint64_t_len(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_insert(vec, 1, 100));
+    EXPECT_EQ(3, vec_uint64_len(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 0, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 0, &value));
     EXPECT_EQ(10, value);
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 1, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 1, &value));
     EXPECT_EQ(100, value);
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 2, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 2, &value));
     EXPECT_EQ(1000, value);
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_free(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
 }
 
-TEST(vec_uint64_t, InsertFirst) {
+TEST(vec_uint64, InsertFirst) {
     uint64_t value = 0;
 
-    vec_uint64_t vec = vec_uint64_t_new();
-    EXPECT_EQ(COL_OK, vec_uint64_t_push_back(vec, 100));
-    EXPECT_EQ(COL_OK, vec_uint64_t_push_back(vec, 1000));
-    EXPECT_EQ(2, vec_uint64_t_len(vec));
+    vec_uint64 vec = vec_uint64_new();
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 100));
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 1000));
+    EXPECT_EQ(2, vec_uint64_len(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_insert(vec, 0, 10));
-    EXPECT_EQ(3, vec_uint64_t_len(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_insert(vec, 0, 10));
+    EXPECT_EQ(3, vec_uint64_len(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 0, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 0, &value));
     EXPECT_EQ(10, value);
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 1, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 1, &value));
     EXPECT_EQ(100, value);
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 2, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 2, &value));
     EXPECT_EQ(1000, value);
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_free(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
 }
 
-TEST(vec_uint64_t, InsertLast) {
+TEST(vec_uint64, InsertLast) {
     uint64_t value = 0;
 
-    vec_uint64_t vec = vec_uint64_t_new();
-    EXPECT_EQ(COL_OK, vec_uint64_t_push_back(vec, 10));
-    EXPECT_EQ(COL_OK, vec_uint64_t_push_back(vec, 100));
-    EXPECT_EQ(2, vec_uint64_t_len(vec));
+    vec_uint64 vec = vec_uint64_new();
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 10));
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 100));
+    EXPECT_EQ(2, vec_uint64_len(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_insert(vec, 2, 1000));
-    EXPECT_EQ(3, vec_uint64_t_len(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_insert(vec, 2, 1000));
+    EXPECT_EQ(3, vec_uint64_len(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 0, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 0, &value));
     EXPECT_EQ(10, value);
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 1, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 1, &value));
     EXPECT_EQ(100, value);
-    EXPECT_EQ(COL_OK, vec_uint64_t_get(vec, 2, &value));
+    EXPECT_EQ(COL_OK, vec_uint64_get(vec, 2, &value));
     EXPECT_EQ(1000, value);
 
-    EXPECT_EQ(COL_OK, vec_uint64_t_free(vec));
+    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
 }
 
-TEST(vec_uint64_t, OverflowComputation) {
+TEST(vec_uint64, OverflowComputation) {
     const auto GROWTH = (unsigned char) 2;
 
     // Overflow
@@ -284,7 +284,7 @@ int is_aligned(size_t  ptr, size_t alignment) {
 }
 
 // https://stackoverflow.com/questions/56619623/why-is-there-no-aligned-realloc-on-most-platforms
-TEST(vec_uint64_t, AlignmentTest) {
+TEST(vec_uint64, AlignmentTest) {
     size_t alignment = 8;
     size_t struct_size = 8;
     size_t requested_structs = 1;
@@ -352,7 +352,7 @@ int is_aligned(void *  ptr, size_t alignment) {
     return ((uintptr_t)ptr % alignment) == 0;
 }
 
-TEST(vec_uint64_t, ColAlignedAlloc) {
+TEST(vec_uint64, ColAlignedAlloc) {
     size_t alignment = 32;
 
     void * data = col_align_alloc(nullptr, 500, alignment);

@@ -31,10 +31,10 @@
 extern "C" {
 #endif
 
-#include "macros.h"
+#include "icemacros.h"
 
-makePrimitiveVecOfTypeApi(uint64_t)
-makeVecApi(uint64_t)
+makePrimitiveVecOfTypeApi(uint64, uint64_t)
+makeVecApi(uint64, uint64_t)
 
 #ifdef __cplusplus
 };

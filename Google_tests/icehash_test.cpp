@@ -26,7 +26,7 @@
  */
 
 #include "gtest/gtest.h"
-#include "../hash.h"
+#include "../icehash.h"
 
 TEST(hash_test, fnv_32a) {
     Fnv32_t h;

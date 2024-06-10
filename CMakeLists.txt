@@ -8,6 +8,7 @@ set(FN_MALLOC "malloc" CACHE STRING "The 'malloc' function to use")
 set(FN_ALIGNED_ALLOC "aligned_alloc" CACHE STRING "The 'aligned_alloc' function to use")
 set(FN_REALLOC "realloc" CACHE STRING "The 'realloc' function to use")
 set(FN_FREE "free" CACHE STRING "The 'free' function to use")
+set(USE_LOG_LEVEL "TRACE" CACHE STRING "The log level used for log messages from the lib")
 
 # No comma here damnit!!!
 add_compile_definitions(
@@ -20,6 +21,25 @@ add_compile_definitions(
 IF(ENABLE_DEBUG)
     add_compile_definitions(IEW_ENABLE_DEBUG=${ENABLE_DEBUG})
 ENDIF (ENABLE_DEBUG)
+
+IF(${USE_LOG_LEVEL} MATCHES "TRACE")
+    MESSAGE(VERBOSE "Using log levels: TRACE, DEBUG, INFO, ERROR")
+    add_compile_definitions(IEW_LOG_LEVEL_ERROR IEW_LOG_LEVEL_INFO IEW_LOG_LEVEL_DEBUG IEW_LOG_LEVEL_TRACE)
+ELSEIF(${USE_LOG_LEVEL} MATCHES "DEBUG")
+    MESSAGE(VERBOSE "Using log levels: DEBUG, INFO, ERROR")
+    add_compile_definitions(IEW_LOG_LEVEL_ERROR IEW_LOG_LEVEL_INFO IEW_LOG_LEVEL_DEBUG)
+ELSEIF(${USE_LOG_LEVEL} MATCHES "INFO")
+    MESSAGE(VERBOSE "Using log levels: INFO, ERROR")
+    add_compile_definitions(IEW_LOG_LEVEL_ERROR IEW_LOG_LEVEL_INFO)
+ELSEIF(${USE_LOG_LEVEL} MATCHES "ERROR")
+    MESSAGE(VERBOSE "Using log levels: ERROR")
+    add_compile_definitions(IEW_LOG_LEVEL_ERROR)
+ELSE(${USE_LOG_LEVEL} MATCHES "TRACE")
+    MESSAGE(VERBOSE "Using log levels: None")
+ENDIF(${USE_LOG_LEVEL} MATCHES "TRACE")
+
+# --- End settings/options
+
 
 # utf8.h
 # Making it available in a submodule makes a lot of troubles so put it here
@@ -41,26 +61,40 @@ FetchContent_MakeAvailable(utf8_h fnv_hash)
 
 add_custom_target(fnv_hash COMMAND make check
         WORKING_DIRECTORY ${fnv_hash_SOURCE_DIR}
+        BYPRODUCTS ${fnv_hash_SOURCE_DIR}/hash_32.o ${fnv_hash_SOURCE_DIR}/hash_32a.o ${fnv_hash_SOURCE_DIR}/hash_64.o ${fnv_hash_SOURCE_DIR}/hash_64a.o
 )
 
 SET(fnv_hash.o ${fnv_hash_SOURCE_DIR}/hash_32.o ${fnv_hash_SOURCE_DIR}/hash_32a.o ${fnv_hash_SOURCE_DIR}/hash_64.o ${fnv_hash_SOURCE_DIR}/hash_64a.o)
 
 add_library(libiewcessentials-static STATIC
+        icemacros.h
+        col_error.h
         utils.c
-        vec_uint64_t.c
+        vec_uint64.c
+        vec_uint64.h
         vec_char.c
+        vec_char.h
+        vec_string.c
+        vec_string.h
+        icelogging.c
+        icelogging.h
         icestring.c
-        hash.h
+        icestring.h
+        icehash.c
+        icehash.h
+        ${utf8_h_SOURCE_DIR}/utf8.h
+        ${fnv_hash_SOURCE_DIR}/fnv.h
 )
 
 add_dependencies(libiewcessentials-static fnv_hash)
 
 target_link_libraries(libiewcessentials-static
-        PUBLIC ${utf8_h_SOURCE_DIR}/utf8.h
-        PUBLIC ${fnv_hash.o}
+        PRIVATE ${utf8_h_SOURCE_DIR}/utf8.h
+        PRIVATE ${fnv_hash.o}
 )
 
 target_include_directories(libiewcessentials-static
+        PUBLIC ${CMAKE_SOURCE_DIR}
         PUBLIC ${utf8_h_SOURCE_DIR}
         PUBLIC ${fnv_hash_SOURCE_DIR}
 )

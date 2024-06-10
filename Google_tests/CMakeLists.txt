@@ -16,10 +16,11 @@ endif()
 
 # Now simply link against gtest or gtest_main as needed. Eg
 add_executable(run_iew_c_essentials_tests
-        vec_uint64_t_test.cc
+        vec_uint64_test.cc
         vec_char_test.cc
+        vec_string_test.cpp
         icestring_test.cc
-        hash_test.cpp
+        icehash_test.cpp
 )
 target_link_libraries(run_iew_c_essentials_tests gtest_main libiewcessentials-static)
 add_test(NAME run_iew_c_essentials_tests COMMAND run_iew_c_essentials_tests)
