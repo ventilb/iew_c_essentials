@@ -21,6 +21,7 @@ add_executable(run_iew_c_essentials_tests
         vec_string_test.cpp
         icestring_test.cc
         icehash_test.cpp
+        icealignedarray_test.cpp
 )
 target_link_libraries(run_iew_c_essentials_tests gtest_main libiewcessentials-static)
 add_test(NAME run_iew_c_essentials_tests COMMAND run_iew_c_essentials_tests)

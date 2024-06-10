@@ -84,6 +84,12 @@ add_library(libiewcessentials-static STATIC
         icehash.h
         ${utf8_h_SOURCE_DIR}/utf8.h
         ${fnv_hash_SOURCE_DIR}/fnv.h
+        icemalloc.h
+        icemalloc.c
+        icealignedarray.c
+        icealignedarray.h
+        vec_uintptr.c
+        vec_uintptr.h
 )
 
 add_dependencies(libiewcessentials-static fnv_hash)
