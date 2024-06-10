@@ -63,9 +63,9 @@ extern "C" {
 
 #define makeArrayOfTypeImpl(name, type, align, len) \
 arr_##name arr_##name##_new() {                     \
-    ltrace("[arr_new] - align=%ld, len=%ld, sizeof=%ld", align, len, sizeof(type)); \
-    const size_t size_aligned = (((size_t) len * sizeof(type) + align) & ~(align - 1)); \
-    arr_##name v = (arr_##name) ice_aligned_malloc(align, size_aligned); \
+    const size_t size_aligned = (((size_t) sizeof(type) + align) & ~(align - 1)); \
+    ltrace("[arr_new] - align=%ld, len=%ld, sizeof=%ld, size_aligned=%ld", align, len, sizeof(type), size_aligned); \
+    arr_##name v = (arr_##name) ice_aligned_malloc(align, len * size_aligned); \
     if (v == NULL) {                                \
         return NULL;                                \
     }                                               \
