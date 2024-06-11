@@ -39,7 +39,8 @@
 void vlog_format(const char* level, const char* message, va_list args) {
     time_t now;
     time(&now);
-    char * date =ctime(&now);
+    char date[64];
+    ctime_r(&now, date);
     date[strlen(date) - 1] = '\0';
     fprintf(stderr, "%s [%s] ", date, level);
     vfprintf(stderr, message, args);
