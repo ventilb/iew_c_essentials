@@ -90,6 +90,8 @@ add_library(libiewcessentials-static STATIC
         icealignedarray.h
         vec_uintptr.c
         vec_uintptr.h
+        vec_float.c
+        vec_float.h
 )
 
 add_dependencies(libiewcessentials-static fnv_hash)
