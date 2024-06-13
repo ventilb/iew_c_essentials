@@ -33,6 +33,7 @@ extern "C" {
 #endif
 
 #include <stdlib.h>
+#include <stdalign.h>
 
 #define CACHE_LINE_SIZE 64
 #define PTR_ALIGN alignof(void *)
@@ -51,6 +52,9 @@ extern "C" {
 void * ice_aligned_malloc(size_t align, size_t size);
 
 void ice_aligned_free(void * ptr);
+
+#define ice_malloc_cache_aligned(s) ice_aligned_malloc(CACHE_LINE_SIZE, s)
+#define ice_malloc_ptr_aligned(s) ice_aligned_malloc(PTR_ALIGN, s)
 
 #ifdef __cplusplus
 }
