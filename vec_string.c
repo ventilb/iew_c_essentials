@@ -27,5 +27,4 @@
 
 #include "vec_string.h"
 
-makePrimitiveVecOfTypeImpl(string, const char*)
-makeVecImpl(string, const char*)
+makeVecOfTypeImpl(string, const char*)

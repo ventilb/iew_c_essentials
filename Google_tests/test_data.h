@@ -24,22 +24,13 @@
  *
  * For more information, please refer to <http://unlicense.org/>
  */
-#ifndef IEW_C_ESSENTIALS_VEC_CHAR_H
-#define IEW_C_ESSENTIALS_VEC_CHAR_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef IEW_C_ESSENTIALS_TEST_DATA_H
+#define IEW_C_ESSENTIALS_TEST_DATA_H
 
-#include "vec_macros.h"
-
-/**
- * Defines vector vec_char which is a vector of chars/bytes.
- */
-makeVecOfTypeApi(char, char)
-
-#ifdef __cplusplus
+struct Vec3_T {
+    float a, b, c;
 };
-#endif
+typedef struct Vec3_T * Vec3;
 
-#endif // IEW_C_ESSENTIALS_VEC_CHAR_H
+#endif //IEW_C_ESSENTIALS_TEST_DATA_H

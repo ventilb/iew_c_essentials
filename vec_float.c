@@ -27,5 +27,4 @@
 
 #include "vec_float.h"
 
-makePrimitiveVecOfTypeImpl(float, float)
-makeVecImpl(float, float)
+makeVecOfTypeImpl(float, float)

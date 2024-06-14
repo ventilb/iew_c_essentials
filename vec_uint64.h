@@ -31,10 +31,9 @@
 extern "C" {
 #endif
 
-#include "icemacros.h"
+#include "vec_macros.h"
 
-makePrimitiveVecOfTypeApi(uint64, uint64_t)
-makeVecApi(uint64, uint64_t)
+makeVecOfTypeApi(uint64, uint64_t)
 
 #ifdef __cplusplus
 };

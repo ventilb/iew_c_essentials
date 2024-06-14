@@ -67,7 +67,7 @@ add_custom_target(fnv_hash COMMAND make check
 SET(fnv_hash.o ${fnv_hash_SOURCE_DIR}/hash_32.o ${fnv_hash_SOURCE_DIR}/hash_32a.o ${fnv_hash_SOURCE_DIR}/hash_64.o ${fnv_hash_SOURCE_DIR}/hash_64a.o)
 
 add_library(libiewcessentials-static STATIC
-        icemacros.h
+        vec_macros.h
         col_error.h
         utils.c
         vec_uint64.c
@@ -92,6 +92,7 @@ add_library(libiewcessentials-static STATIC
         vec_uintptr.h
         vec_float.c
         vec_float.h
+        buf_macros.h
 )
 
 add_dependencies(libiewcessentials-static fnv_hash)

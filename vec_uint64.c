@@ -27,5 +27,4 @@
 
 #include "vec_uint64.h"
 
-makePrimitiveVecOfTypeImpl(uint64, uint64_t)
-makeVecImpl(uint64, uint64_t)
+makeVecOfTypeImpl(uint64, uint64_t)

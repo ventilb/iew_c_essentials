@@ -24,8 +24,8 @@
  *
  * For more information, please refer to <http://unlicense.org/>
  */
-#ifndef IEW_C_ESSENTIALS_ICEMACROS_H
-#define IEW_C_ESSENTIALS_ICEMACROS_H
+#ifndef IEW_C_ESSENTIALS_VEC_MACROS_H
+#define IEW_C_ESSENTIALS_VEC_MACROS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,63 +40,37 @@ extern "C" {
 #include "utils.h"
 #include "icelogging.h"
 
-#define makeVecApi(name, type) \
-    size_t vec_##name##_len(vec_##name v); \
-    col_error_t vec_##name##_pop_back(vec_##name v, type* res); \
-    void vec_##name##_clear(vec_##name v); \
-    int vec_##name##_empty(vec_##name v);  \
-    type* vec_##name##_data(vec_##name v);
-
-#define makePrimitiveVecOfTypeApi(name, type) \
-    typedef type* iter_##name;         \
-    struct vec__##name {                \
-        size_t len;                     \
-        size_t cap;                     \
-        type* data;                     \
-        type* begin;                    \
-        type* end;                      \
-    };                                  \
+#define makeVecOfTypeApi(name, type) \
+    typedef type* iter_##name;       \
+    struct vec__##name {             \
+        size_t len;                  \
+        size_t cap;                  \
+        type* data;                  \
+        type* begin;                 \
+        type* end;                   \
+    };                               \
     typedef struct vec__##name* vec_##name; \
-    vec_##name vec_##name##_new();      \
-    col_error_t vec_##name##_free(vec_##name v); \
-    col_error_t vec_##name##_reserve(vec_##name v, size_t new_cap); \
-    col_error_t vec_##name##_push_back(vec_##name v, type val); \
-    col_error_t vec_##name##_insert(vec_##name v, size_t i, type val); \
-    col_error_t vec_##name##_back(vec_##name v, type* res);     \
-    col_error_t vec_##name##_get(vec_##name v, size_t i, type* res); \
-    col_error_t vec_##name##_set(vec_##name v, size_t i, type val);  \
-    col_error_t vec_##name##_erase(vec_##name v, size_t i);                                   \
-    iter_##name vec_##name##_begin(vec_##name v);   \
-    iter_##name vec_##name##_end(vec_##name v);
+    typedef col_error_t (*PFN_vec_##name##_each)(vec_##name v, size_t i, void * pUserData); \
+    vec_##name vec_##name##_new();   \
+    col_error_t vec_##name##_free(vec_##name v);                                            \
+    col_error_t vec_##name##_reserve(vec_##name v, size_t new_cap);                         \
+    col_error_t vec_##name##_push_back(vec_##name v, type val);                             \
+    col_error_t vec_##name##_insert(vec_##name v, size_t i, type val);                      \
+    col_error_t vec_##name##_back(vec_##name v, type* res);                                 \
+    col_error_t vec_##name##_get(vec_##name v, size_t i, type* res);                        \
+    col_error_t vec_##name##_set(vec_##name v, size_t i, type val);                         \
+    col_error_t vec_##name##_erase(vec_##name v, size_t i);                                 \
+    size_t vec_##name##_len(vec_##name v);  \
+    col_error_t vec_##name##_pop_back(vec_##name v, type* res);                             \
+    void vec_##name##_clear(vec_##name v);  \
+    int vec_##name##_empty(vec_##name v);   \
+    type* vec_##name##_data(vec_##name v);  \
+    col_error_t vec_##name##_each(vec_##name v, PFN_vec_##name##_each cb, void * pUserData);\
+    col_error_t vec_##name##_each_reverse(vec_##name v, PFN_vec_##name##_each, void * pUserData); \
+    iter_ ## name vec_ ## name ## _begin(vec_ ## name v ) ;                                 \
+    iter_ ## name vec_ ## name ## _end(vec_ ## name v ) ;
 
-
-#define makeVecImpl(name, type) \
-    size_t vec_##name##_len(vec_##name v) { \
-        return v->len;    \
-    }                     \
-    col_error_t vec_##name##_pop_back(vec_##name v, type* res) { \
-        if (v->len <= 0) {\
-            return COL_ERR_UNDERFLOW;       \
-        }                 \
-        v->len --;        \
-        if (res != NULL) {\
-            *res = v->data[v->len];         \
-        }                 \
-        v->end = NULL;    \
-        return COL_OK;    \
-    }                     \
-    void vec_##name##_clear(vec_##name v) { \
-        v->len = 0;       \
-        v->end = NULL;    \
-    }                     \
-    int vec_##name##_empty(vec_##name v) { \
-        return v->len == 0;                 \
-    }                     \
-    type* vec_##name##_data(vec_##name v) { \
-        return v->data;   \
-    }
-
-#define makePrimitiveVecOfTypeImpl(name, type) \
+#define makeVecOfTypeImpl(name, type) \
 vec_##name vec_##name##_new() {          \
     ltrace("[vec_new] - sizeof=%d", sizeof(struct vec__##name)); \
     vec_##name v = IEW_FN_ALIGNED_ALLOC(sizeof(void *), sizeof(struct vec__##name));    \
@@ -219,21 +193,72 @@ col_error_t vec_##name##_erase(vec_##name v, size_t i) {   \
     v->len --;                           \
     v->end = NULL;                       \
     return COL_OK;                       \
-}                                        \
-                                         \
-iter_##name vec_##name##_begin(vec_##name v) {                   \
-        if (!v->begin) v->begin = v->data;                       \
-        return v->begin;                 \
-    }                                    \
-                                         \
-iter_##name vec_##name##_end(vec_##name v) {                     \
-        if (!v->end) v->end = v->data + v->len;                  \
-        return v->end;                   \
-    }
-
+}                                              \
+                                               \
+size_t vec_##name##_len(vec_##name v) {        \
+    return v->len;                             \
+}                                              \
+col_error_t vec_##name##_pop_back(vec_##name v, type* res) {     \
+    if (v->len <= 0) {                         \
+        return COL_ERR_UNDERFLOW;              \
+    }                                          \
+    v->len --;                                 \
+    if (res != NULL) {                         \
+        *res = v->data[v->len];                \
+    }                                          \
+    v->end = NULL;                             \
+    return COL_OK;                             \
+}                                              \
+void vec_##name##_clear(vec_##name v) {        \
+    v->len = 0;                                \
+    v->end = NULL;                             \
+}                                              \
+int vec_##name##_empty(vec_##name v) {         \
+    return v->len == 0;                        \
+}                                              \
+type* vec_##name##_data(vec_##name v) {        \
+    return v->data;                            \
+}                                              \
+                                               \
+col_error_t vec_##name##_each(vec_##name v, PFN_vec_##name##_each cb, void * pUserData) {                     \
+    col_error_t err = COL_OK;                       \
+    for (size_t i = 0; i < v->len; ++i) {              \
+        err = cb(v, i, pUserData);                  \
+        if (err != COL_OK) {                        \
+            return err;                             \
+        }                                           \
+    }                                               \
+    return err;                                     \
+} \
+col_error_t vec_##name##_each_reverse(vec_##name v, PFN_vec_##name##_each cb, void * pUserData) {               \
+    col_error_t err = COL_OK;                       \
+    /* size_t cannot become negative. So
+     * we must call callback for the first
+     * element extra */                             \
+    for (size_t i = v->len - 1; i > 0; --i) {          \
+        err = cb(v, i, pUserData);                  \
+        if (err != COL_OK) {                        \
+            return err;                             \
+        }                                           \
+    }                                               \
+    err = cb(v, 0, pUserData);                      \
+    if (err != COL_OK) {                            \
+        return err;                                 \
+    }                                               \
+    return err;                                     \
+}                                     \
+iter_##name vec_##name##_begin(vec_##name v) { \
+    if (!v->begin) v->begin = v->data;         \
+    return v->begin;                           \
+}                                              \
+                                               \
+iter_##name vec_##name##_end(vec_##name v) {   \
+    if (!v->end) v->end = v->data + v->len;    \
+    return v->end;                             \
+}
 
 #ifdef __cplusplus
 };
 #endif
 
-#endif // IEW_C_ESSENTIALS_ICEMACROS_H
+#endif // IEW_C_ESSENTIALS_VEC_MACROS_H

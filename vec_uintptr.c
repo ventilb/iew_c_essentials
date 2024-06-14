@@ -27,5 +27,4 @@
 
 #include "vec_uintptr.h"
 
-makePrimitiveVecOfTypeImpl(uintptr, uintptr_t)
-makeVecImpl(uintptr, uintptr_t)
+makeVecOfTypeImpl(uintptr, uintptr_t)

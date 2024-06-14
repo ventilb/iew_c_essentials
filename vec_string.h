@@ -31,13 +31,12 @@
 extern "C" {
 #endif
 
-#include "icemacros.h"
+#include "vec_macros.h"
 
 /**
  * Defines a vector of strings (char *).
  */
-makePrimitiveVecOfTypeApi(string, const char*)
-makeVecApi(string, const char*)
+makeVecOfTypeApi(string, const char*)
 
 #ifdef __cplusplus
 };

@@ -148,9 +148,9 @@ TEST(vec_uint64, IteratorTest) {
     }
 
     int i = 0;
-    for (iter_uint64 b = vec_uint64_begin(vec); b < vec_uint64_end(vec); b ++) {
+    for (iter_uint64 b = vec_uint64_begin(vec); b < vec_uint64_end(vec); b++) {
         EXPECT_EQ(pow(10, (i + 1)), *b);
-        i ++;
+        i++;
     }
 
     for (size_t b = 0; b < vec_uint64_len(vec);) {
@@ -242,6 +242,33 @@ TEST(vec_uint64, InsertLast) {
     EXPECT_EQ(COL_OK, vec_uint64_free(vec));
 }
 
+col_error_t vec_uint64_sum(vec_uint64 v, size_t i, void *pData) {
+    auto *sum = ((uint64_t *) pData);
+    uint64_t x;
+    col_error_t err = vec_uint64_get(v, i, &x);
+
+    *sum = *sum + x;
+
+    return err;
+}
+
+TEST(vec_uint64, Each) {
+    uint64_t sum = 0;
+
+    vec_uint64 vec = vec_uint64_new();
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 10));
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 100));
+    EXPECT_EQ(COL_OK, vec_uint64_push_back(vec, 1000));
+
+    EXPECT_EQ(COL_OK, vec_uint64_each(vec, &vec_uint64_sum, &sum));
+    EXPECT_EQ(1110, sum);
+
+    EXPECT_EQ(COL_OK, vec_uint64_each_reverse(vec, &vec_uint64_sum, &sum));
+    EXPECT_EQ(2220, sum);
+
+    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
+}
+
 TEST(vec_uint64, OverflowComputation) {
     const auto GROWTH = (unsigned char) 2;
 
@@ -272,14 +299,14 @@ TEST(vec_uint64, OverflowComputation) {
     size_t bar = SIZE_MAX;
     EXPECT_EQ(bar, foo);
 
-    const auto growth2 = (double ) 1.5;
+    const auto growth2 = (double) 1.5;
     const auto cur_cap = (size_t) 2;
-    auto size = (size_t) ceil((growth2 * ((double ) cur_cap + (double ) 2)));
+    auto size = (size_t) ceil((growth2 * ((double) cur_cap + (double) 2)));
     EXPECT_EQ(6, size);
 }
 
 
-int is_aligned(size_t  ptr, size_t alignment) {
+int is_aligned(size_t ptr, size_t alignment) {
     return (ptr % alignment) == 0;
 }
 
@@ -289,7 +316,7 @@ TEST(vec_uint64, AlignmentTest) {
     size_t struct_size = 8;
     size_t requested_structs = 1;
 
-    size_t aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment-1));
+    size_t aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment - 1));
     EXPECT_EQ(16, aligned_size);
     EXPECT_EQ(2, aligned_size / struct_size);
     EXPECT_TRUE(is_aligned(aligned_size, alignment));
@@ -297,7 +324,7 @@ TEST(vec_uint64, AlignmentTest) {
     alignment = 8;
     struct_size = 3;
 
-    aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment-1));
+    aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment - 1));
     EXPECT_EQ(8, aligned_size);
     EXPECT_EQ(2, aligned_size / struct_size);
     EXPECT_TRUE(is_aligned(aligned_size, alignment));
@@ -305,7 +332,7 @@ TEST(vec_uint64, AlignmentTest) {
     alignment = 8;
     struct_size = 7;
 
-    aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment-1));
+    aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment - 1));
     EXPECT_EQ(8, aligned_size);
     EXPECT_EQ(1, aligned_size / struct_size);
     EXPECT_TRUE(is_aligned(aligned_size, alignment));
@@ -313,7 +340,7 @@ TEST(vec_uint64, AlignmentTest) {
     alignment = 8;
     struct_size = 2;
 
-    aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment-1));
+    aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment - 1));
     EXPECT_EQ(8, aligned_size);
     EXPECT_EQ(4, aligned_size / struct_size);
     EXPECT_TRUE(is_aligned(aligned_size, alignment));
@@ -321,7 +348,7 @@ TEST(vec_uint64, AlignmentTest) {
     alignment = 8;
     struct_size = 1;
 
-    aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment-1));
+    aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment - 1));
     EXPECT_EQ(8, aligned_size);
     EXPECT_EQ(8, aligned_size / struct_size);
     EXPECT_TRUE(is_aligned(aligned_size, alignment));
@@ -329,7 +356,7 @@ TEST(vec_uint64, AlignmentTest) {
     alignment = 1;
     struct_size = 3;
 
-    aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment-1));
+    aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment - 1));
     EXPECT_EQ(4, aligned_size);
     EXPECT_EQ(1, aligned_size / struct_size);
     EXPECT_TRUE(is_aligned(aligned_size, alignment));
@@ -337,7 +364,7 @@ TEST(vec_uint64, AlignmentTest) {
     alignment = 1;
     struct_size = 2;
 
-    aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment-1));
+    aligned_size = ((requested_structs * struct_size + alignment) & ~(alignment - 1));
     EXPECT_EQ(3, aligned_size);
     EXPECT_EQ(1, aligned_size / struct_size);
     EXPECT_TRUE(is_aligned(aligned_size, alignment));
@@ -348,14 +375,14 @@ TEST(vec_uint64, AlignmentTest) {
     EXPECT_TRUE(is_aligned(8, 1));
 }
 
-int is_aligned(void *  ptr, size_t alignment) {
-    return ((uintptr_t)ptr % alignment) == 0;
+int is_aligned(void *ptr, size_t alignment) {
+    return ((uintptr_t) ptr % alignment) == 0;
 }
 
 TEST(vec_uint64, ColAlignedAlloc) {
     size_t alignment = 32;
 
-    void * data = col_align_alloc(nullptr, 500, alignment);
+    void *data = col_align_alloc(nullptr, 500, alignment);
     EXPECT_NE(nullptr, data);
     EXPECT_TRUE(is_aligned(data, alignment));
 

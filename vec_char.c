@@ -27,5 +27,4 @@
 
 #include "vec_char.h"
 
-makePrimitiveVecOfTypeImpl(char, char)
-makeVecImpl(char, char)
+makeVecOfTypeImpl(char, char)

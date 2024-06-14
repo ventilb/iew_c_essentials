@@ -27,11 +27,7 @@
 
 #include "gtest/gtest.h"
 #include "../icealignedarray.h"
-
-struct Vec3_T {
-    float a, b, c;
-};
-typedef struct Vec3_T * Vec3;
+#include "test_data.h"
 
 makeArrayOfTypeApi(ArrVec3, struct Vec3_T)
 makeArrayOfTypeImpl(ArrVec3, struct Vec3_T, 16, 3)
