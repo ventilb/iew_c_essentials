@@ -93,6 +93,10 @@ add_library(libiewcessentials-static STATIC
         vec_float.c
         vec_float.h
         buf_macros.h
+        ice_hash_table_macros.h
+        vec_int.c
+        vec_int.h
+        ice_bits.h
 )
 
 add_dependencies(libiewcessentials-static fnv_hash)
@@ -109,4 +113,3 @@ target_include_directories(libiewcessentials-static
 )
 
 add_subdirectory(Google_tests)
-

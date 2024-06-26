@@ -24,6 +24,8 @@ add_executable(run_iew_c_essentials_tests
         icealignedarray_test.cpp
         buf_test.cpp
         test_data.h
+        hash_table_test.cpp
+        ice_stack_allocator_test.cpp
 )
 target_link_libraries(run_iew_c_essentials_tests gtest_main libiewcessentials-static)
 add_test(NAME run_iew_c_essentials_tests COMMAND run_iew_c_essentials_tests)
