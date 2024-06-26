@@ -34,6 +34,7 @@ extern "C" {
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <math.h>
 
 #include "col_error.h"
@@ -51,6 +52,7 @@ extern "C" {
     };                               \
     typedef struct vec__##name* vec_##name; \
     typedef col_error_t (*PFN_vec_##name##_each)(vec_##name v, size_t i, void * pUserData); \
+    typedef col_error_t (*PFN_vec_##name##_pred)(vec_##name v, size_t i, bool * pMatch, void * pUserData); \
     vec_##name vec_##name##_new();   \
     col_error_t vec_##name##_free(vec_##name v);                                            \
     col_error_t vec_##name##_reserve(vec_##name v, size_t new_cap);                         \
@@ -67,6 +69,10 @@ extern "C" {
     type* vec_##name##_data(vec_##name v);  \
     col_error_t vec_##name##_each(vec_##name v, PFN_vec_##name##_each cb, void * pUserData);\
     col_error_t vec_##name##_each_reverse(vec_##name v, PFN_vec_##name##_each, void * pUserData); \
+    col_error_t vec_##name##_search(vec_##name v,                                           \
+                                    PFN_vec_##name##_pred predicate,                        \
+                                    size_t *pIndex,                                         \
+                                    void * pUserData);                                      \
     iter_ ## name vec_ ## name ## _begin(vec_ ## name v ) ;                                 \
     iter_ ## name vec_ ## name ## _end(vec_ ## name v ) ;
 
@@ -255,6 +261,25 @@ iter_##name vec_##name##_begin(vec_##name v) { \
 iter_##name vec_##name##_end(vec_##name v) {   \
     if (!v->end) v->end = v->data + v->len;    \
     return v->end;                             \
+}                                     \
+col_error_t vec_##name##_search(vec_##name v,                    \
+                                PFN_vec_##name##_pred predicate, \
+                                size_t *pIndex,                  \
+                                void * pUserData) {              \
+    col_error_t err = COL_OK;         \
+    bool match = false;               \
+    for (size_t i = 0; i < v->len; ++i) {\
+        err = predicate(v, i, &match, pUserData);                \
+        if (match) {                  \
+            *pIndex = i;              \
+            return err;               \
+        }                             \
+        if (err != COL_OK) {          \
+            return err;               \
+        }                             \
+    }                                 \
+    *pIndex = v->len;                 \
+    return err;                       \
 }
 
 #ifdef __cplusplus
