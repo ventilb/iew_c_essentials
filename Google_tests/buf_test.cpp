@@ -79,3 +79,55 @@ TEST(buf_test, create_buf) {
 
     EXPECT_EQ(COL_OK, buf_Vec3_free(buf));
 }
+
+col_error_t find_vec(buf_Vec3 v, size_t i, bool *pMatch, void * pUserData) {
+    float f = *((float*) pUserData);
+    Vec3 vec = nullptr;
+    buf_Vec3_get(v, i, &vec);
+    *pMatch = (vec->a == f && vec->b == f && vec->c == f);
+    return COL_OK;
+}
+
+TEST(buf_test, search) {
+    buf_Vec3 buf = buf_Vec3_new(CACHE_LINE_SIZE);
+
+
+    EXPECT_EQ(COL_OK, buf_Vec3_reserve(buf, 3));
+    buf_Vec3_set_lim(buf, 10);
+
+    Vec3 v = nullptr;
+    EXPECT_EQ(COL_OK, buf_Vec3_get(buf, 0, &v));
+    v->a = 1.0f;
+    v->b = 1.0f;
+    v->c = 1.0f;
+
+    EXPECT_EQ(COL_OK, buf_Vec3_get(buf, 1, &v));
+    v->a = 2.0f;
+    v->b = 2.0f;
+    v->c = 2.0f;
+
+    EXPECT_EQ(COL_OK, buf_Vec3_get(buf, 2, &v));
+    v->a = 3.0f;
+    v->b = 3.0f;
+    v->c = 3.0f;
+
+    float lookup = 2.0f;
+    size_t index = 0;
+    EXPECT_EQ(COL_OK, buf_Vec3_search(buf, find_vec, &index, &lookup));
+    EXPECT_EQ(1, index);
+
+    lookup = 1.0f;
+    EXPECT_EQ(COL_OK, buf_Vec3_search(buf, find_vec, &index, &lookup));
+    EXPECT_EQ(0, index);
+
+    lookup = 3.0f;
+    EXPECT_EQ(COL_OK, buf_Vec3_search(buf, find_vec, &index, &lookup));
+    EXPECT_EQ(2, index);
+
+    // Not found
+    lookup = 4.0f;
+    EXPECT_EQ(COL_OK, buf_Vec3_search(buf, find_vec, &index, &lookup));
+    EXPECT_EQ(buf_Vec3_lim(buf), index);
+
+    EXPECT_EQ(COL_OK, buf_Vec3_free(buf));
+}

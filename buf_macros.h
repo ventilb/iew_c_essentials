@@ -36,6 +36,7 @@ extern "C" {
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
+#include <stdbool.h>
 
 #include "col_error.h"
 #include "utils.h"
@@ -45,6 +46,11 @@ extern "C" {
  * buf_<name>_memset
  * Uses memset which is not safe to erase data because
  * the memset call might be optimized away
+ *
+ * @brief buf_<name>_get(buf_<name> v, size_t i, <type>** res)
+ * Fetch buffer entry at position i and put pointer to entry
+ * at res. Returns COL_OK on success or COL_ERR_UNDERFLOW if
+ * i is greater or equal to the buffers limit.
  */
 
 #define makeBufOfTypeApi(name, type) \
@@ -57,6 +63,7 @@ extern "C" {
     };                               \
     typedef struct buf__##name* buf_##name; \
     typedef col_error_t (*PFN_buf_##name##_each)(buf_##name v, size_t i, void * pUserData); \
+    typedef col_error_t (*PFN_buf_##name##_pred)(buf_##name v, size_t i, bool * pMatch, void * pUserData); \
     buf_##name buf_##name##_new(size_t align);   \
     col_error_t buf_##name##_free(buf_##name v);                                            \
     col_error_t buf_##name##_reserve(buf_##name v, size_t new_cap);                         \
@@ -69,7 +76,8 @@ extern "C" {
     int buf_##name##_empty(buf_##name v);   \
     type* buf_##name##_data(buf_##name v);  \
     col_error_t buf_##name##_each(buf_##name v, PFN_buf_##name##_each cb, void * pUserData);\
-    col_error_t buf_##name##_each_reverse(buf_##name v, PFN_buf_##name##_each, void * pUserData);
+    col_error_t buf_##name##_each_reverse(buf_##name v, PFN_buf_##name##_each each, void * pUserData); \
+    col_error_t buf_##name##_search(buf_##name v, PFN_buf_##name##_pred predicate, size_t *pIndex, void * pUserData);
 
 #define makeBufOfTypeImpl(name, type) \
 buf_##name buf_##name##_new(size_t align) { \
@@ -192,6 +200,24 @@ col_error_t buf_##name##_each_reverse(buf_##name v, PFN_buf_##name##_each cb, vo
         }                             \
     }                                 \
     return cb(v, 0, pUserData);       \
+} \
+col_error_t buf_##name##_search(buf_##name v,                    \
+                                PFN_buf_##name##_pred predicate, \
+                                size_t *pIndex,                  \
+                                void * pUserData) {              \
+    col_error_t err = COL_OK;         \
+    bool match = false;               \
+    for (size_t i = 0; i < v->lim; ++i) {   \
+        err = predicate(v, i, &match, pUserData);                \
+        if (err != COL_OK) {          \
+            return err;               \
+        } else if (match) {           \
+            *pIndex = i;              \
+            return err;               \
+        }                             \
+    }                                 \
+    *pIndex = v->lim;                 \
+    return err;                       \
 }
 
 #ifdef __cplusplus
