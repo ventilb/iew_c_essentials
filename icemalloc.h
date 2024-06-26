@@ -34,6 +34,7 @@ extern "C" {
 
 #include <stdlib.h>
 #include <stdalign.h>
+#include <stddef.h>
 
 #define CACHE_LINE_SIZE 64
 #define PTR_ALIGN alignof(void *)
@@ -49,12 +50,44 @@ extern "C" {
     (((num) + ((align) - 1)) & ~((align) - 1))
 #endif
 
-void * ice_aligned_malloc(size_t align, size_t size);
+void *ice_aligned_malloc(size_t align, size_t size);
 
-void ice_aligned_free(void * ptr);
+void *ice_aligned_zmalloc(size_t align, size_t size);
+
+void ice_aligned_free(void *ptr);
 
 #define ice_malloc_cache_aligned(s) ice_aligned_malloc(CACHE_LINE_SIZE, s)
+#define ice_zmalloc_cache_aligned(s) ice_aligned_zmalloc(CACHE_LINE_SIZE, s)
 #define ice_malloc_ptr_aligned(s) ice_aligned_malloc(PTR_ALIGN, s)
+#define ice_zmalloc_ptr_aligned(s) ice_aligned_zmalloc(PTR_ALIGN, s)
+
+typedef struct ice_stack_allocator_t {
+    size_t offset;
+    size_t size;
+    char *buf;
+} *ice_stack_allocator;
+
+static inline ice_stack_allocator ice_stack_malloc_new(size_t size) {
+    size = ice_align_up(size, PTR_ALIGN);
+    struct ice_stack_allocator_t *allocator =
+            (struct ice_stack_allocator_t *) ice_malloc_ptr_aligned(sizeof(struct ice_stack_allocator_t) + size);
+    if (allocator != NULL) {
+        allocator->buf = (char*) allocator + sizeof(size_t)/*offset*/ + sizeof(size_t)/*size*/;
+        allocator->offset = 0;
+        allocator->size = size;
+    }
+    return allocator;
+}
+
+void *ice_stack_malloc(ice_stack_allocator allocator, size_t size);
+
+void *ice_stack_zmalloc(ice_stack_allocator allocator, size_t size);
+
+static inline void ice_stack_malloc_free(ice_stack_allocator allocator) {
+    if (allocator != NULL) {
+        ice_aligned_free(allocator);
+    }
+}
 
 #ifdef __cplusplus
 }

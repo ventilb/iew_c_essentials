@@ -28,6 +28,7 @@
 #include "icemalloc.h"
 #include "icelogging.h"
 #include "col_error.h"
+#include "string.h"
 
 typedef u_int16_t offset_t;
 #define PTR_OFFSET_SZ sizeof(offset_t)
@@ -56,6 +57,33 @@ void * ice_aligned_malloc(size_t align, size_t size) {
     return ptr;
 }
 
+void * ice_aligned_zmalloc(size_t align, size_t size) {
+    ltrace("[ice_aligned_zmalloc] - align=%ld, size=%ld", align, size);
+    void * ptr = NULL;
+
+    IVK_ASSERT((align & (align - 1)) == 0, "align must be power of 2");
+
+    if (align > 0 && size > 0) {
+        const size_t hdr_size = PTR_OFFSET_SZ + (align - 1);
+        ltrace("[ice_aligned_zmalloc] - hdr_size=%ld, alloc size=%ld", hdr_size, size+hdr_size);
+
+        const void * p = IEW_FN_MALLOC(size + hdr_size);
+        ltrace("[ice_aligned_zmalloc] - pointer malloc=%ld", p);
+
+        if (p != NULL) {
+            // This is unsafe because compiler might optimize away
+            // this memset call. Haven't found how to use memset_s yet.
+            memset((void *) p, 0, size + hdr_size);
+            ptr = (void *) ice_align_up(((uintptr_t ) p + PTR_OFFSET_SZ), align);
+            ltrace("[ice_aligned_malloc] - pointer aligned=%ld", ptr);
+
+            *((offset_t *) ptr - 1) = (offset_t)((uintptr_t ) ptr - (uintptr_t ) p);
+            ltrace("[ice_aligned_malloc] - offset=%ld", *((offset_t *) ptr - 1));
+        }
+    }
+    return ptr;
+}
+
 void ice_aligned_free(void * ptr) {
     if (ptr == NULL) {
         return;
@@ -63,4 +91,39 @@ void ice_aligned_free(void * ptr) {
     offset_t offset = *((offset_t *) ptr - 1);
     void * p = (void *)((uint8_t *) ptr - offset);
     IEW_FN_FREE(p);
+}
+
+void* ice_stack_malloc(ice_stack_allocator allocator, size_t size) {
+    if (size == 0) {
+        return NULL;
+    }
+    size = ice_align_up(size, PTR_ALIGN);
+
+    if (size > (allocator->size - allocator->offset)) {
+        return NULL;
+    }
+
+    void *ptr = (allocator->buf + allocator->offset);
+
+    allocator->offset += size;
+
+    return ptr;
+}
+
+void* ice_stack_zmalloc(ice_stack_allocator allocator, size_t size) {
+    if (size == 0) {
+        return NULL;
+    }
+    size = ice_align_up(size, PTR_ALIGN);
+
+    if (size > (allocator->size - allocator->offset)) {
+        return NULL;
+    }
+
+    void *ptr = (allocator->buf + allocator->offset);
+    memset((void *) ptr, 0, size);
+
+    allocator->offset += size;
+
+    return ptr;
 }
