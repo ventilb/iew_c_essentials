@@ -62,7 +62,7 @@ char * str_nbof(const char * s, size_t nb);
  */
 char * str_of_empty();
 
-char * str_free(char * str);
+void str_free(char * str);
 
 /**
  * The length (number of codepoints) of str.

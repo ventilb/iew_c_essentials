@@ -39,7 +39,12 @@ extern "C" {
 #define CACHE_LINE_SIZE 64
 #define PTR_ALIGN alignof(void *)
 
+extern const double VEC_GROWTH;
+
 // https://embeddedartistry.com/blog/2017/02/22/generating-aligned-memory/
+
+typedef u_int16_t offset_t;
+#define PTR_OFFSET_SZ sizeof(offset_t)
 
 /**
  * Used to align an integer value (int, uint_t, uintptr_t,...) to it's upper
@@ -49,6 +54,12 @@ extern "C" {
 #define ice_align_up(num, align) \
     (((num) + ((align) - 1)) & ~((align) - 1))
 #endif
+
+#define ice_offset_of(memblock) *((offset_t *) (memblock) - 1)
+
+#define ice_is_aligned(memblock, align) ((uintptr_t) (memblock) % (align)) == 0
+
+void * ice_aligned_realloc(void * memblock, size_t align, size_t old_size, size_t new_size);
 
 void *ice_aligned_malloc(size_t align, size_t size);
 

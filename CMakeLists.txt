@@ -69,7 +69,6 @@ SET(fnv_hash.o ${fnv_hash_SOURCE_DIR}/hash_32.o ${fnv_hash_SOURCE_DIR}/hash_32a.
 add_library(libiewcessentials-static STATIC
         vec_macros.h
         col_error.h
-        utils.c
         vec_uint64.c
         vec_uint64.h
         vec_char.c

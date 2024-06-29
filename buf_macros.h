@@ -39,7 +39,6 @@ extern "C" {
 #include <stdbool.h>
 
 #include "col_error.h"
-#include "utils.h"
 #include "icelogging.h"
 #include "icemalloc.h"
 /**
@@ -65,13 +64,14 @@ extern "C" {
     typedef col_error_t (*PFN_buf_##name##_each)(buf_##name v, size_t i, void * pUserData); \
     typedef col_error_t (*PFN_buf_##name##_pred)(buf_##name v, size_t i, bool * pMatch, void * pUserData); \
     buf_##name buf_##name##_new(size_t align);   \
-    col_error_t buf_##name##_free(buf_##name v);                                            \
+    void buf_##name##_free(buf_##name v);                                            \
     col_error_t buf_##name##_reserve(buf_##name v, size_t new_cap);                         \
     col_error_t buf_##name##_back(buf_##name v, type** res);                                \
+    col_error_t buf_##name##_emplace_back(buf_##name v, type** res);                        \
     col_error_t buf_##name##_get(buf_##name v, size_t i, type** res);                       \
     col_error_t buf_##name##_memset(buf_##name v, size_t i, int c);                         \
     size_t buf_##name##_lim(buf_##name v);  \
-    void buf_##name##_set_lim(buf_##name v, size_t lim);                                     \
+    void buf_##name##_set_lim(buf_##name v, size_t lim);                                    \
     void buf_##name##_clear(buf_##name v);  \
     int buf_##name##_empty(buf_##name v);   \
     type* buf_##name##_data(buf_##name v);  \
@@ -81,19 +81,19 @@ extern "C" {
 
 #define makeBufOfTypeImpl(name, type) \
 buf_##name buf_##name##_new(size_t align) { \
-    ltrace("[buf_new] - sizeof=%d", sizeof(struct buf__##name)); \
+    ltrace("[buf_new] - sizeof=%d, sizeof type=%d", sizeof(struct buf__##name), sizeof(type)); \
     buf_##name v = (buf_##name) ice_aligned_malloc(align, sizeof(struct buf__##name)); \
     if (v) {                          \
         v->lim = 0;                   \
         v->cap = 0;                   \
         v->align = align;             \
-        v->alignedSize = (((size_t) sizeof(type) + align) & ~(align - 1));      \
+        v->alignedSize = ice_align_up(sizeof(type), align);\
         v->data = NULL;               \
     }                                 \
     return v;                         \
 }                                     \
                                       \
-col_error_t buf_##name##_free(buf_##name v) {                    \
+void buf_##name##_free(buf_##name v) {                    \
         if (v) {                      \
             if (v->data) {ice_aligned_free(v->data);}            \
             v->lim = 0;               \
@@ -101,9 +101,8 @@ col_error_t buf_##name##_free(buf_##name v) {                    \
             v->align = 0;             \
             v->alignedSize = 0;       \
             v->data = NULL;           \
-            ice_aligned_free(v);    \
+            ice_aligned_free(v);      \
         }                             \
-        return COL_OK;                \
     }                                 \
                                       \
 col_error_t buf_##name##_reserve(buf_##name v, size_t new_cap) { \
@@ -119,10 +118,11 @@ col_error_t buf_##name##_reserve(buf_##name v, size_t new_cap) { \
         return COL_ERR_BAD_ALLOC;     \
     }                                 \
                                       \
-    const size_t size_bytes = new_cap * v->alignedSize;          \
+    const size_t old_size_bytes = v->cap * v->alignedSize;                                     \
+    const size_t new_size_bytes = new_cap * v->alignedSize;                                    \
                                       \
-    ltrace("[buf_reserve] - current cap=%ld, lim=%ld, new cap=%ld, aligned size=%ld", v->cap, v->lim, new_cap, v->align); \
-    char * data = (char *) col_align_alloc(v->data, size_bytes, v->align);\
+    ltrace("[buf_reserve] - cur_cap=%ld, lim=%ld, new_cap=%ld, aligned_size=%ld, old_size_bytes=%ld, new_size_bytes=%ld", v->cap, v->lim, new_cap, v->alignedSize, old_size_bytes, new_size_bytes); \
+    char * data = (char *) ice_aligned_realloc(v->data, v->align, old_size_bytes, new_size_bytes); \
                                          \
     if (data == NULL) {                  \
         return COL_ERR_BAD_ALLOC;        \
@@ -136,10 +136,19 @@ col_error_t buf_##name##_back(buf_##name v, type** res) {         \
     if (v->lim <= 0) {                   \
         return COL_ERR_UNDERFLOW;        \
     }                                    \
-    *res = (type *) (v->data + ((v->lim-1) * v->alignedSize));                 \
-    return COL_OK;                       \
-}                                        \
-                                         \
+    *res = (type *) (v->data + ((v->lim-1) * v->alignedSize));   \
+    return COL_OK;                    \
+}                                     \
+                                      \
+col_error_t buf_##name##_emplace_back(buf_##name v, type** res) {\
+    col_error_t err = buf_##name##_reserve(v, v->lim + 1);       \
+    if (err != COL_OK) {              \
+        return err;                   \
+    }                                 \
+    buf_##name##_set_lim(v, v->lim + 1);    \
+    return buf_##name##_get(v, v->lim - 1, res);\
+}                                     \
+                                      \
 col_error_t buf_##name##_get(buf_##name v, size_t i, type** res) {\
     if (i >= v->lim) {                \
         return COL_ERR_OVERFLOW;      \

@@ -35,8 +35,7 @@ TEST(string_builder, StrOfEmpty) {
     EXPECT_EQ(0, str_size(str));
     EXPECT_STREQ("", str);
 
-    str = str_free(str);
-    EXPECT_EQ(nullptr, str);
+    str_free(str);
 }
 
 TEST(string_builder, StrOf) {
@@ -46,8 +45,7 @@ TEST(string_builder, StrOf) {
     EXPECT_EQ(8, str_size(str)); // Doesn't count the '\0' byte
     EXPECT_STREQ("a猫🍌", str);
 
-    str = str_free(str);
-    EXPECT_EQ(nullptr, str);
+    str_free(str);
 
     str = str_of("");
 
@@ -55,8 +53,7 @@ TEST(string_builder, StrOf) {
     EXPECT_EQ(0, str_size(str));
     EXPECT_STREQ("", str);
 
-    str = str_free(str);
-    EXPECT_EQ(nullptr, str);
+    str_free(str);
 
     str = str_of(nullptr);
 
@@ -64,8 +61,7 @@ TEST(string_builder, StrOf) {
     EXPECT_EQ(0, str_size(str));
     EXPECT_STREQ("", str);
 
-    str = str_free(str);
-    EXPECT_EQ(nullptr, str);
+    str_free(str);
 }
 
 TEST(string_builder, StrAppend) {
@@ -86,8 +82,7 @@ TEST(string_builder, StrAppend) {
     EXPECT_EQ(9, str_size(str));
     EXPECT_STREQ("a猫🍌c", str);
 
-    str = str_free(str);
-    EXPECT_EQ(nullptr, str);
+    str_free(str);
 }
 
 TEST(string_builder, StrIndexRune) {
@@ -102,8 +97,7 @@ TEST(string_builder, StrIndexRune) {
     EXPECT_EQ(0, str_index_rune("\0", '\0'));
     EXPECT_EQ(-1, str_index_rune("\0", 'a'));
 
-    str = str_free(str);
-    EXPECT_EQ(nullptr, str);
+    str_free(str);
 }
 
 TEST(string_builder, StrIndexString) {
@@ -129,8 +123,7 @@ TEST(string_builder, StrIndexString) {
     EXPECT_EQ(0, str_index_string("\0", "\0"));
     EXPECT_EQ(-1, str_index_string("\0", "a"));
 
-    str = str_free(str);
-    EXPECT_EQ(nullptr, str);
+    str_free(str);
 }
 
 TEST(string_builder, StrSubstring) {
@@ -146,8 +139,7 @@ TEST(string_builder, StrSubstring) {
     sub = str_substring(str, 1, 10);
     EXPECT_STREQ("猫🍌c", sub);
 
-    str = str_free(str);
-    EXPECT_EQ(nullptr, str);
+    str_free(str);
 
     EXPECT_STREQ("a", str_substring("a", 0, 1));
 

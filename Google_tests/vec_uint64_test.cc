@@ -42,7 +42,7 @@ TEST(vec_uint64, VecAllocation) {
     // data member allocated
     EXPECT_EQ(nullptr, vec_uint64_data(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
+    vec_uint64_free(vec);
 }
 
 TEST(vec_uint64, VecPushBack) {
@@ -79,7 +79,7 @@ TEST(vec_uint64, VecPushBack) {
     EXPECT_EQ(0, vec_uint64_len(vec));
     EXPECT_TRUE(vec_uint64_empty(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
+    vec_uint64_free(vec);
 }
 
 TEST(vec_uint64, VecClear) {
@@ -91,7 +91,7 @@ TEST(vec_uint64, VecClear) {
 
     EXPECT_EQ(0, vec_uint64_len(vec)); // vector is empty
 
-    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
+    vec_uint64_free(vec);
 }
 
 TEST(vec_uint64, VecSetGet) {
@@ -122,7 +122,7 @@ TEST(vec_uint64, VecSetGet) {
     EXPECT_EQ(42, value);
     EXPECT_EQ(1, vec_uint64_len(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
+    vec_uint64_free(vec);
 }
 
 TEST(vec_uint64, IteratorTest) {
@@ -176,7 +176,7 @@ TEST(vec_uint64, IteratorTest) {
     EXPECT_EQ(COL_OK, vec_uint64_erase(vec, 0));
     EXPECT_EQ(0, vec_uint64_len(vec));
 
-    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
+    vec_uint64_free(vec);
 }
 
 TEST(vec_uint64, InsertInMiddle) {
@@ -197,7 +197,7 @@ TEST(vec_uint64, InsertInMiddle) {
     EXPECT_EQ(COL_OK, vec_uint64_get(vec, 2, &value));
     EXPECT_EQ(1000, value);
 
-    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
+    vec_uint64_free(vec);
 }
 
 TEST(vec_uint64, InsertFirst) {
@@ -218,7 +218,7 @@ TEST(vec_uint64, InsertFirst) {
     EXPECT_EQ(COL_OK, vec_uint64_get(vec, 2, &value));
     EXPECT_EQ(1000, value);
 
-    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
+    vec_uint64_free(vec);
 }
 
 TEST(vec_uint64, InsertLast) {
@@ -239,7 +239,7 @@ TEST(vec_uint64, InsertLast) {
     EXPECT_EQ(COL_OK, vec_uint64_get(vec, 2, &value));
     EXPECT_EQ(1000, value);
 
-    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
+    vec_uint64_free(vec);
 }
 
 col_error_t vec_uint64_sum(vec_uint64 v, size_t i, void *pData) {
@@ -266,7 +266,7 @@ TEST(vec_uint64, Each) {
     EXPECT_EQ(COL_OK, vec_uint64_each_reverse(vec, &vec_uint64_sum, &sum));
     EXPECT_EQ(2220, sum);
 
-    EXPECT_EQ(COL_OK, vec_uint64_free(vec));
+    vec_uint64_free(vec);
 }
 
 TEST(vec_uint64, OverflowComputation) {
@@ -373,22 +373,4 @@ TEST(vec_uint64, AlignmentTest) {
     EXPECT_TRUE(is_aligned(8, 4));
     EXPECT_TRUE(is_aligned(8, 2));
     EXPECT_TRUE(is_aligned(8, 1));
-}
-
-int is_aligned(void *ptr, size_t alignment) {
-    return ((uintptr_t) ptr % alignment) == 0;
-}
-
-TEST(vec_uint64, ColAlignedAlloc) {
-    size_t alignment = 32;
-
-    void *data = col_align_alloc(nullptr, 500, alignment);
-    EXPECT_NE(nullptr, data);
-    EXPECT_TRUE(is_aligned(data, alignment));
-
-    data = col_align_alloc(data, 16394, alignment);
-    EXPECT_NE(nullptr, data);
-    EXPECT_TRUE(is_aligned(data, alignment));
-
-    free(data);
 }

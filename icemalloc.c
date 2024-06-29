@@ -25,13 +25,76 @@
  * For more information, please refer to <http://unlicense.org/>
  */
 
+#include <string.h>
+
 #include "icemalloc.h"
 #include "icelogging.h"
 #include "col_error.h"
-#include "string.h"
 
-typedef u_int16_t offset_t;
-#define PTR_OFFSET_SZ sizeof(offset_t)
+const double VEC_GROWTH = (double) 1.5;
+
+// https://stackoverflow.com/questions/64884745/is-there-a-linux-equivalent-of-aligned-realloc
+int ice_is_aligned_ptr(void *  ptr, size_t alignment) {
+    return ((uintptr_t)ptr % alignment) == 0;
+}
+
+void* ice_aligned_realloc_pessimistic(void * ptr, size_t new_size, size_t old_size, size_t alignment) {
+    void* aligned = IEW_FN_ALIGNED_ALLOC(alignment, new_size);
+    if (aligned == NULL)  {
+        return NULL;
+    }
+
+    memcpy(aligned, ptr, old_size);
+    free(ptr);
+    return aligned;
+}
+
+static inline void * ice_align_memblock(const void * p, size_t align) {
+    void * ptr = NULL;
+    if (p != NULL) {
+        ptr = (void *) ice_align_up(((uintptr_t ) p + PTR_OFFSET_SZ), align);
+        ltrace("[ice_aligned_malloc] - pointer aligned=%ld", ptr);
+
+        *((offset_t *) ptr - 1) = (offset_t)((uintptr_t ) ptr - (uintptr_t ) p);
+        ltrace("[ice_aligned_malloc] - offset=%ld", *((offset_t *) ptr - 1));
+    }
+    return ptr;
+}
+
+void * ice_aligned_realloc(void * memblock, size_t align, size_t old_size, size_t new_size) {
+    ltrace("[ice_aligned_realloc] - memblock=%ld, align=%ld, old_size=%ld, new_size=%ld", memblock, align, old_size, new_size);
+
+    IVK_ASSERT((align & (align - 1)) == 0, "align must be power of 2");
+
+    if (align == 0) {
+        return NULL;
+    }
+
+    if (new_size == 0) {
+        if (memblock != NULL) {
+            ice_aligned_free(memblock);
+        }
+        return NULL;
+    }
+
+    if (new_size <= old_size) {
+        return memblock;
+    }
+
+    // Allocate a new block
+    void * fake_new_ptr = ice_aligned_malloc(align, new_size);
+    if (fake_new_ptr == NULL) {
+        return NULL;
+    }
+
+    // Copy data to new block
+    if (memblock != NULL) {
+        memcpy(fake_new_ptr, memblock, old_size);
+        ice_aligned_free(memblock);
+    }
+
+    return fake_new_ptr;
+}
 
 void * ice_aligned_malloc(size_t align, size_t size) {
     ltrace("[ice_aligned_malloc] - align=%ld, size=%ld", align, size);
@@ -46,13 +109,7 @@ void * ice_aligned_malloc(size_t align, size_t size) {
         const void * p = IEW_FN_MALLOC(size + hdr_size);
         ltrace("[ice_aligned_malloc] - pointer malloc=%ld", p);
 
-        if (p != NULL) {
-            ptr = (void *) ice_align_up(((uintptr_t ) p + PTR_OFFSET_SZ), align);
-            ltrace("[ice_aligned_malloc] - pointer aligned=%ld", ptr);
-
-            *((offset_t *) ptr - 1) = (offset_t)((uintptr_t ) ptr - (uintptr_t ) p);
-            ltrace("[ice_aligned_malloc] - offset=%ld", *((offset_t *) ptr - 1));
-        }
+        ptr = ice_align_memblock(p, align);
     }
     return ptr;
 }

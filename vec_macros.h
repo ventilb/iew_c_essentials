@@ -38,7 +38,7 @@ extern "C" {
 #include <math.h>
 
 #include "col_error.h"
-#include "utils.h"
+#include "icemalloc.h"
 #include "icelogging.h"
 
 #define makeVecOfTypeApi(name, type) \
@@ -54,7 +54,7 @@ extern "C" {
     typedef col_error_t (*PFN_vec_##name##_each)(vec_##name v, size_t i, void * pUserData); \
     typedef col_error_t (*PFN_vec_##name##_pred)(vec_##name v, size_t i, bool * pMatch, void * pUserData); \
     vec_##name vec_##name##_new();   \
-    col_error_t vec_##name##_free(vec_##name v);                                            \
+    void vec_##name##_free(vec_##name v);                                            \
     col_error_t vec_##name##_reserve(vec_##name v, size_t new_cap);                         \
     col_error_t vec_##name##_push_back(vec_##name v, type val);                             \
     col_error_t vec_##name##_insert(vec_##name v, size_t i, type val);                      \
@@ -79,7 +79,7 @@ extern "C" {
 #define makeVecOfTypeImpl(name, type) \
 vec_##name vec_##name##_new() {          \
     ltrace("[vec_new] - sizeof=%d", sizeof(struct vec__##name)); \
-    vec_##name v = IEW_FN_ALIGNED_ALLOC(sizeof(void *), sizeof(struct vec__##name));    \
+    vec_##name v = ice_aligned_malloc(PTR_ALIGN, sizeof(struct vec__##name));    \
     if (v) {                             \
         v->len = 0;                      \
         v->cap = 0;                      \
@@ -90,19 +90,18 @@ vec_##name vec_##name##_new() {          \
     return v;                            \
 } \
                                          \
-col_error_t vec_##name##_free(vec_##name v) {                    \
-        if (v) {                         \
-            if (v->data) {IEW_FN_FREE(v->data);}                 \
-            v->len = 0;                  \
-            v->cap = 0;                  \
-            v->data = NULL;              \
-            v->begin = NULL;             \
-            v->end = NULL;               \
-            IEW_FN_FREE(v);              \
-        }                                \
-        return COL_OK;                   \
-    }                                    \
-                                         \
+void vec_##name##_free(vec_##name v) {\
+    if (v) {                          \
+        if (v->data) {ice_aligned_free(v->data);}                     \
+        v->len = 0;                   \
+        v->cap = 0;                   \
+        v->data = NULL;               \
+        v->begin = NULL;              \
+        v->end = NULL;                \
+        ice_aligned_free(v);          \
+    }                                 \
+}                                     \
+                                      \
 col_error_t vec_##name##_reserve(vec_##name v, size_t new_cap) { \
     ltrace("[vec_reserve] - requested new cap=%d", new_cap);     \
     if (new_cap <= v->cap) {             \
@@ -116,11 +115,12 @@ col_error_t vec_##name##_reserve(vec_##name v, size_t new_cap) { \
         return COL_ERR_BAD_ALLOC;        \
     }                                    \
                                          \
-    size_t size_bytes = new_cap * sizeof(type);                  \
-    const size_t alignment = sizeof(void *);                     \
-                                         \
+    const size_t old_size_bytes = v->cap * sizeof(type);         \
+    const size_t new_size_bytes = new_cap * sizeof(type);        \
+                                      \
+    ltrace("[vec_reserve] - cur_cap=%ld, lim=%ld, new_cap=%ld, old_size_bytes=%ld, new_size_bytes=%ld", v->cap, v->len, new_cap, old_size_bytes, new_size_bytes); \
     ltrace("[vec_reserve] - currentCap=%d, len=%d, new cap=%d", v->cap, v->len, new_cap); \
-    void * data = col_align_alloc(v->data, size_bytes, alignment);\
+    void * data = ice_aligned_realloc(v->data, PTR_ALIGN, old_size_bytes, new_size_bytes);\
                                          \
     if (data == NULL) {                  \
         return COL_ERR_BAD_ALLOC;        \

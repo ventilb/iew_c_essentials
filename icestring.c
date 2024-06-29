@@ -26,10 +26,8 @@
  */
 
 #include "icestring.h"
-#include "utils.h"
+#include "icemalloc.h"
 
-#include <stdlib.h>
-#include <math.h>
 #include <string.h>
 
 char * str_of(const char * s) {
@@ -50,7 +48,7 @@ char * str_nbof(const char * s, size_t nb) {
         return str_of_empty();
     } else {
         char * buf;
-        if ((buf = col_align_alloc(NULL, nb + 1, sizeof(void *))) == NULL) {
+        if ((buf = ice_aligned_malloc(PTR_ALIGN, nb + 1)) == NULL) {
             return NULL;
         }
         memcpy(buf, s, nb);
@@ -62,18 +60,17 @@ char * str_nbof(const char * s, size_t nb) {
 
 char * str_of_empty() {
     char * buf;
-    if ((buf = col_align_alloc(NULL, 1, sizeof(void *))) == NULL) {
+    if ((buf = ice_aligned_malloc(PTR_ALIGN, 1)) == NULL) {
         return NULL;
     }
     buf[0] = '\0';
     return buf;
 }
 
-char * str_free(char * str) {
+void str_free(char * str) {
     if (str != NULL) {
-        IEW_FN_FREE(str);
+        ice_aligned_free(str);
     }
-    return NULL;
 }
 
 size_t str_len(const char * str) {
@@ -99,10 +96,9 @@ char * str_append(char * str, const char * s) {
         buf = str_of(s);
     } else {
         const size_t strlen_bytes = utf8size_lazy(str);
-        if ((buf = col_align_alloc(str, strlen_bytes + slen_bytes + 1, sizeof(void *))) == NULL) {
+        if ((buf = ice_aligned_realloc(str, PTR_ALIGN, strlen_bytes, (strlen_bytes + slen_bytes + 1))) == NULL) {
             return NULL;
         }
-        memcpy(buf, str, strlen_bytes);
         memcpy(buf + strlen_bytes, s, slen_bytes);
         buf[strlen_bytes + slen_bytes] = '\0';
     }

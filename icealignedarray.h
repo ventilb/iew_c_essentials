@@ -38,7 +38,6 @@ extern "C" {
 #include <math.h>
 
 #include "col_error.h"
-#include "utils.h"
 #include "icelogging.h"
 #include "icemalloc.h"
 
@@ -63,7 +62,7 @@ extern "C" {
 
 #define makeArrayOfTypeImpl(name, type, align, len) \
 arr_##name arr_##name##_new() {                     \
-    const size_t size_aligned = (((size_t) sizeof(type) + align) & ~(align - 1)); \
+    const size_t size_aligned = ice_align_up(sizeof(type), align); \
     ltrace("[arr_new] - align=%ld, len=%ld, sizeof=%ld, size_aligned=%ld", align, len, sizeof(type), size_aligned); \
     arr_##name v = (arr_##name) ice_aligned_malloc(align, len * size_aligned); \
     if (v == NULL) {                                \
@@ -90,7 +89,7 @@ col_error_t arr_##name##_get(arr_##name v, size_t i, type** res) {              
     if (i >= len) {                                 \
         return COL_ERR_ILLEGAL_ARGUMENT;            \
     }                                               \
-    const size_t size_aligned = (((size_t) sizeof(type) + align) & ~(align - 1));   \
+    const size_t size_aligned = ice_align_up(sizeof(type), align); \
     ltrace("[arr_get] - i=%ld, size_aligned=%ld", i, size_aligned);                 \
     *res = (type *) (((char *) v) + i * size_aligned);                              \
     return COL_OK;                                  \

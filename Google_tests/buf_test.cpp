@@ -77,7 +77,7 @@ TEST(buf_test, create_buf) {
     EXPECT_EQ(COL_OK, buf_Vec3_back(buf, &v3));
     EXPECT_EQ(v2, v3);
 
-    EXPECT_EQ(COL_OK, buf_Vec3_free(buf));
+    buf_Vec3_free(buf);
 }
 
 col_error_t find_vec(buf_Vec3 v, size_t i, bool *pMatch, void * pUserData) {
@@ -129,5 +129,26 @@ TEST(buf_test, search) {
     EXPECT_EQ(COL_OK, buf_Vec3_search(buf, find_vec, &index, &lookup));
     EXPECT_EQ(buf_Vec3_lim(buf), index);
 
-    EXPECT_EQ(COL_OK, buf_Vec3_free(buf));
+    buf_Vec3_free(buf);
+}
+
+TEST(buf_test, emplace_back) {
+    buf_Vec3 buf = buf_Vec3_new(1);
+
+    Vec3 v1 = nullptr;
+    EXPECT_EQ(COL_OK, buf_Vec3_emplace_back(buf, &v1));
+    EXPECT_EQ(buf->data, (char*) v1);
+    EXPECT_EQ(1, buf_Vec3_lim(buf));
+
+    Vec3 v2 = nullptr;
+    EXPECT_EQ(COL_OK, buf_Vec3_emplace_back(buf, &v2));
+    EXPECT_EQ(buf->data + 12, (char*) v2);
+    EXPECT_EQ(2, buf_Vec3_lim(buf));
+
+    Vec3 v3 = nullptr;
+    EXPECT_EQ(COL_OK, buf_Vec3_emplace_back(buf, &v3));
+    EXPECT_EQ(buf->data + 24, (char*) v3);
+    EXPECT_EQ(3, buf_Vec3_lim(buf));
+
+    buf_Vec3_free(buf);
 }
